@@ -38,3 +38,6 @@ async def film_details(film_id: str, film_service: FilmService = Depends(get_fil
         # вы бы предоставляли клиентам данные, которые им не нужны 
         # и, возможно, данные, которые опасно возвращать
     return Film(id=film.id, title=film.title)
+
+def ww():
+    print("11")
