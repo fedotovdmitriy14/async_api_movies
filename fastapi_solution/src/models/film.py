@@ -1,9 +1,8 @@
+from http import HTTPStatus
 import orjson
-
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
-
-from fastapi_solution.src.services.film import FilmService, get_film_service
+from services.film import FilmService, get_film_service
 
 router = APIRouter()
 
@@ -41,6 +40,3 @@ async def film_details(film_id: str, film_service: FilmService = Depends(get_fil
         # вы бы предоставляли клиентам данные, которые им не нужны 
         # и, возможно, данные, которые опасно возвращать
     return Film(id=film.id, title=film.title)
-
-def ww():
-    print("11")
