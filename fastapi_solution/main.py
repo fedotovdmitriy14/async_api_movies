@@ -1,5 +1,3 @@
-import logging
-
 import aioredis
 import uvicorn
 from elasticsearch import AsyncElasticsearch
@@ -7,7 +5,6 @@ from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 
 from core import config
-from core.logger import LOGGING
 from api.v1 import films
 from db import elastic
 from db import redis
