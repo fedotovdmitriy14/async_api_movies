@@ -7,7 +7,7 @@ from fastapi import Depends
 
 from fastapi_solution.src.db.elastic import get_elastic
 from fastapi_solution.src.db.redis import get_redis
-from fastapi_solution.src.models.film_ import Film
+from fastapi_solution.src.models.film import Film
 
 FILM_CACHE_EXPIRE_IN_SECONDS = 60 * 5  # 5 минут
 

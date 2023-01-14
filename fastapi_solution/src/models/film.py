@@ -3,7 +3,7 @@ import orjson
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
-from fastapi_solution.src.services.film_ import FilmService, get_film_service
+from fastapi_solution.src.services.film import FilmService, get_film_service
 
 router = APIRouter()
 
@@ -11,33 +11,17 @@ router = APIRouter()
 def orjson_dumps(v, *, default):
     # orjson.dumps возвращает bytes, а pydantic требует unicode, поэтому декодируем
     return orjson.dumps(v, default=default).decode()
-    
-class AbstractModel(BaseModel):
+
+
+class Film(BaseModel):
     id: str
+    title: str
+    description: str
 
     class Config:
         # Заменяем стандартную работу с json на более быструю
         json_loads = orjson.loads
         json_dumps = orjson_dumps
-
-
-class Film(AbstractModel):
-    title: str
-    description: str | None
-    imdb_rating: float
-    genre: list | None
-    director: list
-    actors: list | None
-    writers: list | None
-    
-
-class Genre(AbstractModel):
-    name: str
-    description: str
-
-
-class Person(AbstractModel):
-    full_name: str
     
 
 # Внедряем FilmService с помощью Depends(get_film_service)
