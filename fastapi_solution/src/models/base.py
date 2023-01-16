@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from uuid import UUID
 import orjson
 
@@ -9,7 +9,7 @@ def orjson_dumps(v, *, default):
 
 
 class AbstractModel(BaseModel):
-    uuid: UUID
+    uuid: UUID = Field(alias="id")
 
     class Config:
         # Заменяем стандартную работу с json на более быструю
