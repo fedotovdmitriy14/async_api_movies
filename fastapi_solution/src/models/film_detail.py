@@ -1,20 +1,24 @@
 from http import HTTPStatus
 from fastapi import APIRouter, Depends, HTTPException
 from models.base import AbstractModel
-from models.person import Person
+from models.person import PersonShort
 from services.film import FilmService, get_film_service
 from pydantic.schema import Optional, List
-from pydantic import Field
 
 router = APIRouter()
+
+
+class FilmShort(AbstractModel):
+    title: str
+    imdb_rating: Optional[float]
 
 
 class FilmDetail(AbstractModel):
     title: str
     description: Optional[str] = None
-    imdb_rating: Optional[float] = Field(alias='rating')
-    actors: Optional[List[Person]] = None
-    writers: Optional[List[Person]] = None
+    imdb_rating: Optional[float]
+    actors: Optional[List[PersonShort]] = None
+    writers: Optional[List[PersonShort]] = None
     director: Optional[List] = None
     genre: Optional[List] = None
     actors_names: Optional[List] = None
