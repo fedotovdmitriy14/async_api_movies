@@ -1,7 +1,11 @@
 from models.base import AbstractModel
-from pydantic.schema import Dict
+from typing import Optional, List
 
 
-class Person(AbstractModel):
+class PersonShort(AbstractModel):
     full_name: str
-    roles: Dict
+
+
+class Person(PersonShort):
+    roles: Optional[List[str]]
+    film_ids: Optional[List[str]]
