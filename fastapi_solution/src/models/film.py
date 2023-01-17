@@ -13,10 +13,8 @@ class FilmShort(AbstractModel):
     imdb_rating: Optional[float]
 
 
-class FilmDetail(AbstractModel):
-    title: str
+class FilmDetail(FilmShort):
     description: Optional[str] = None
-    imdb_rating: Optional[float]
     actors: Optional[List[PersonShort]] = None
     writers: Optional[List[PersonShort]] = None
     director: Optional[List] = None
