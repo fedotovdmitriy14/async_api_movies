@@ -20,6 +20,9 @@ class FilmService:
         self.redis = redis
         self.elastic = elastic
 
+    async def get_all_films(self):
+        return self.elastic.ping()
+
     # get_by_id возвращает объект фильма. Он опционален, так как фильм может отсутствовать в базе
     async def get_by_id(self, film_id: str) -> Optional[Film]:
         # Пытаемся получить данные из кеша, потому что оно работает быстрее
