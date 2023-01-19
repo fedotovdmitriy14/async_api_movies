@@ -1,32 +1,31 @@
 from http import HTTPStatus
-import orjson
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
+from pydantic.schema import Optional, List
 
-from src.services.film import FilmService, get_film_service
+from src.models.base import AbstractModel
+from src.models.person import PersonShort
 
 router = APIRouter()
 
 
-def orjson_dumps(v, *, default):
-    # orjson.dumps возвращает bytes, а pydantic требует unicode, поэтому декодируем
-    return orjson.dumps(v, default=default).decode()
-
-
-class Film(BaseModel):
-    id: str
+class FilmShort(AbstractModel):
     title: str
-    description: str
+    imdb_rating: Optional[float]
 
-    class Config:
-        # Заменяем стандартную работу с json на более быструю
-        json_loads = orjson.loads
-        json_dumps = orjson_dumps
+
+class FilmDetail(FilmShort):
+    description: Optional[str] = None
+    actors: Optional[List[PersonShort]] = None
+    writers: Optional[List[PersonShort]] = None
+    director: Optional[List] = None
+    genre: Optional[List] = None
+    actors_names: Optional[List] = None
+    writers_names: Optional[List] = None
 
 
 # Внедряем FilmService с помощью Depends(get_film_service)
-@router.get('/{film_id}', response_model=Film)
-async def film_details(film_id: str, film_service: FilmService = Depends(get_film_service)) -> Film:
+@router.get('/{film_id}', response_model=FilmDetail)
+async def film_details(film_id: str, film_service: FilmService = Depends(get_film_service)) -> FilmDetail:
     film = await film_service.get_by_id(film_id)
     if not film:
         # Если фильм не найден, отдаём 404 статус
@@ -40,4 +39,4 @@ async def film_details(film_id: str, film_service: FilmService = Depends(get_fil
         # Если бы использовалась общая модель для бизнес-логики и формирования ответов API
         # вы бы предоставляли клиентам данные, которые им не нужны
         # и, возможно, данные, которые опасно возвращать
-    return Film(id=film.id, title=film.title)
+    return FilmDetail(id=film.id, title=film.title)
