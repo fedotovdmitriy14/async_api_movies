@@ -20,8 +20,15 @@ class FilmService:
         self.redis = redis
         self.elastic = elastic
 
-    async def get_all_films(self):
+    async def get_all_films(self, sort=None):
         body = {'size': 500, 'query': {'match_all': {}}}
+        if sort:
+            order = 'asc'
+            if sort[0] == '-':
+                order = 'desc'
+                sort = sort[1:]
+            if sort in FilmShort.__annotations__:
+                body.update({'sort': [{sort: {'order': order}}]})
         document = await self.elastic.search(index='movies', body=body)
         result = [FilmShort(**hit["_source"]) for hit in document["hits"]["hits"]]
         return result
