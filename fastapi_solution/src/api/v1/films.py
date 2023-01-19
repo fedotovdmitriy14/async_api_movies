@@ -1,5 +1,7 @@
+from http import HTTPStatus
+
 from elasticsearch import AsyncElasticsearch
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 # Объект router, в котором регистрируем обработчики
@@ -36,4 +38,6 @@ async def film_details(film_id: str) -> Film:
 async def get_all_films(db: AsyncElasticsearch = Depends(get_elastic)):
     films = FilmService(redis=None, elastic=db)
     response = await films.get_all_films()
+    if not response:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='films not found')
     return response
