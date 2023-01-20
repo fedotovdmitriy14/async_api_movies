@@ -24,8 +24,6 @@ class FilmService:
     async def get_all_films(
             self,
             sort: Optional[str] = None,
-            page_number: Optional[int] = None,
-            page_size: Optional[int] = None,
             filter_genre: Optional[str] = None
     ):
         body = {'query': {'match_all': {}}}
@@ -62,13 +60,6 @@ class FilmService:
                 sort = sort[1:]
             if sort in FilmShort.__annotations__:
                 body.update({'sort': [{sort: {'order': order}}]})
-        if page_number and page_size and 10000 > page_size >= 0 and page_number > 0:
-            body.update(
-                {
-                    'size': page_size,
-                    'from': (page_number - 1) * page_size,
-                }
-            )
         document = await self.elastic.search(index='movies', body=body)
         result = [FilmShort(**hit["_source"]) for hit in document["hits"]["hits"]]
         return result
