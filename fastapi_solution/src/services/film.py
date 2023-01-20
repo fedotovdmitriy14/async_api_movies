@@ -21,7 +21,13 @@ class FilmService:
         self.redis = redis
         self.elastic = elastic
 
-    async def get_all_films(self, sort=None, page_number=None, page_size=None, filter_genre=None):
+    async def get_all_films(
+            self,
+            sort: Optional[str] = None,
+            page_number: Optional[int] = None,
+            page_size: Optional[int] = None,
+            filter_genre: Optional[str] = None
+    ):
         body = {'query': {'match_all': {}}}
         if filter_genre:
             body = {
@@ -83,6 +89,34 @@ class FilmService:
             # await self._put_film_to_cache(film)
 
         return film
+
+    async def get_sorted_films(
+            self,
+            query: Optional[str] = None,
+            page_number: Optional[int] = None,
+            page_size: Optional[int] = None,
+    ) -> Optional[list[FilmShort]]:
+        body = {'query': {'match_all': {}}}
+        if query:
+            body = {
+                'query': {
+                    'bool': {
+                        'should': [
+                            {'match': {'title': query}},
+                        ]
+                    }
+                }
+            }
+        if page_number and page_size and 10000 > page_size >= 0 and page_number > 0:
+            body.update(
+                {
+                    'size': page_size,
+                    'from': (page_number - 1) * page_size,
+                }
+            )
+        document = await self.elastic.search(index='movies', body=body)
+        result = [FilmShort(**hit["_source"]) for hit in document["hits"]["hits"]]
+        return result
 
     async def _get_film_from_elastic(self, film_id: str) -> Optional[FilmShort]:
         try:
