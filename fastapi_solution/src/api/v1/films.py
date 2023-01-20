@@ -38,7 +38,7 @@ async def film_details(film_id: str) -> Film:
 @router.get('/', response_model=list[FilmShort])
 async def get_all_films(
         sort: Optional[str] = Query(default=None),
-        page_number: Optional[int] = Query(None, alias='page[number'),
+        page_number: Optional[int] = Query(None, alias='page[number]'),
         page_size: Optional[int] = Query(None, alias='page[size]'),
         filter_genre: Optional[str] = Query(None, alias='filter[genre]'),
         db: AsyncElasticsearch = Depends(get_elastic),
