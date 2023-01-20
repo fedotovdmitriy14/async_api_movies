@@ -8,7 +8,7 @@ from fastapi import Depends, HTTPException
 
 from src.db.elastic import get_elastic
 from src.db.redis import get_redis
-from src.models.film import FilmShort, FilmDetail
+from src.models.film import FilmShort
 
 FILM_CACHE_EXPIRE_IN_SECONDS = 60 * 5  # 5 минут
 
@@ -68,7 +68,7 @@ class FilmService:
     async def get_by_id(self, film_id: str) -> Optional[dict]:
         # Пытаемся получить данные из кеша, потому что оно работает быстрее
         # film = await self._film_from_cache(film_id)
-        film = None # пока нет redis
+        film = None  # пока нет redis
         if not film:
             # Если фильма нет в кеше, то ищем его в Elasticsearch
             try:
