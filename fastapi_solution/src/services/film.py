@@ -8,7 +8,7 @@ from fastapi import Depends, HTTPException
 
 from src.db.elastic import get_elastic
 from src.db.redis import get_redis
-from src.models.film import FilmShort
+from src.models.film import FilmShort, FilmDetail
 
 FILM_CACHE_EXPIRE_IN_SECONDS = 60 * 5  # 5 минут
 
@@ -62,10 +62,12 @@ class FilmService:
                 body.update({'sort': [{sort: {'order': order}}]})
         document = await self.elastic.search(index='movies', body=body)
         result = [FilmShort(**hit["_source"]) for hit in document["hits"]["hits"]]
+        if not result:
+            raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='films not found')
         return result
 
     # get_by_id возвращает объект фильма. Он опционален, так как фильм может отсутствовать в базе
-    async def get_by_id(self, film_id: str) -> Optional[dict]:
+    async def get_by_id(self, film_id: str) -> Optional[FilmDetail]:
         # Пытаемся получить данные из кеша, потому что оно работает быстрее
         # film = await self._film_from_cache(film_id)
         film = None  # пока нет redis
@@ -79,7 +81,7 @@ class FilmService:
             # Сохраняем фильм  в кеш
             # await self._put_film_to_cache(film)
 
-        return film
+        return FilmDetail(**film)
 
     async def get_sorted_films(
             self,
@@ -107,6 +109,8 @@ class FilmService:
             )
         document = await self.elastic.search(index='movies', body=body)
         result = [FilmShort(**hit["_source"]) for hit in document["hits"]["hits"]]
+        if not result:
+            raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='films not found')
         return result
 
     async def _get_film_from_elastic(self, film_id: str) -> Optional[FilmShort]:

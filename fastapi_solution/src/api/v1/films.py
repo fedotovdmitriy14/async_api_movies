@@ -1,7 +1,6 @@
-from http import HTTPStatus
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Query
 
 from src.models.film import FilmShort, FilmDetail
 from src.services.film import FilmService, get_film_service
@@ -19,8 +18,7 @@ async def get_one_film(
         film_id: str,
         film_service: FilmService = Depends(get_film_service),
 ) -> FilmDetail:
-    response = await film_service.get_by_id(film_id=film_id)
-    return FilmDetail(**response)
+    return await film_service.get_by_id(film_id=film_id)
 
 
 @router.get(
@@ -34,13 +32,10 @@ async def get_all_films(
         filter_genre: Optional[str] = Query(None, alias='filter[genre]'),
         film_service: FilmService = Depends(get_film_service),
 ) -> list[FilmShort]:
-    response = await film_service.get_all_films(
+    return await film_service.get_all_films(
         sort=sort,
         filter_genre=filter_genre
     )
-    if not response:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='films not found')
-    return response
 
 
 @router.get(
@@ -55,11 +50,8 @@ async def search_films(
         page_size: Optional[int] = Query(None, alias='page[size]'),
         film_service: FilmService = Depends(get_film_service),
 ) -> list[FilmShort]:
-    response = await film_service.get_sorted_films(
+    return await film_service.get_sorted_films(
         page_size=page_size,
         page_number=page_number,
         query=query,
     )
-    if not response:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='films not found')
-    return response
