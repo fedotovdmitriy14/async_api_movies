@@ -20,8 +20,34 @@ class FilmService:
         self.redis = redis
         self.elastic = elastic
 
-    async def get_all_films(self, sort=None, page_number=None, page_size=None):
+    async def get_all_films(self, sort=None, page_number=None, page_size=None, filter_genre=None):
         body = {'query': {'match_all': {}}}
+        if filter_genre:
+            body = {
+                'query': {
+                    'bool': {
+                        'must': [
+                            {
+                                'nested': {
+                                    'path': 'genre',
+                                    'query': {
+                                        'bool': {
+                                            'should': [
+                                                {
+                                                    'term':
+                                                        {
+                                                            'genre.id': filter_genre,
+                                                        }
+                                                }
+                                            ]
+                                        }
+                                    },
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
         if sort:
             order = 'asc'
             if sort[0] == '-':

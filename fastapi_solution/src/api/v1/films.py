@@ -40,10 +40,16 @@ async def get_all_films(
         sort: Optional[str] = Query(default=None),
         page_number: Optional[int] = Query(None, alias='page[number'),
         page_size: Optional[int] = Query(None, alias='page[size]'),
+        filter_genre: Optional[str] = Query(None, alias='filter[genre]'),
         db: AsyncElasticsearch = Depends(get_elastic),
 ):
     films = FilmService(redis=None, elastic=db)
-    response = await films.get_all_films(sort=sort, page_size=page_size, page_number=page_number)
+    response = await films.get_all_films(
+        sort=sort,
+        page_size=page_size,
+        page_number=page_number,
+        filter_genre=filter_genre
+    )
     if not response:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='films not found')
     return response
