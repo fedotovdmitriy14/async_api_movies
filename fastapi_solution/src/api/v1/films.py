@@ -1,12 +1,10 @@
 from http import HTTPStatus
 from typing import Optional
 
-from elasticsearch import AsyncElasticsearch
 from fastapi import APIRouter, Depends, HTTPException, Query
 
-from src.db.elastic import get_elastic
 from src.models.film import FilmShort, FilmDetail
-from src.services.film import FilmService
+from src.services.film import FilmService, get_film_service
 
 router = APIRouter()
 
@@ -14,10 +12,9 @@ router = APIRouter()
 @router.get('/{film_id}', response_model=FilmDetail)
 async def get_one_film(
         film_id: str,
-        db: AsyncElasticsearch = Depends(get_elastic),
+        film_service: FilmService = Depends(get_film_service),
 ) -> FilmDetail:
-    film = FilmService(redis=None, elastic=db)
-    response = await film.get_by_id(film_id=film_id)
+    response = await film_service.get_by_id(film_id=film_id)
     return FilmDetail(**response)
 
 
@@ -25,10 +22,9 @@ async def get_one_film(
 async def get_all_films(
         sort: Optional[str] = Query(default=None),
         filter_genre: Optional[str] = Query(None, alias='filter[genre]'),
-        db: AsyncElasticsearch = Depends(get_elastic),
+        film_service: FilmService = Depends(get_film_service),
 ) -> list[FilmShort]:
-    films = FilmService(redis=None, elastic=db)
-    response = await films.get_all_films(
+    response = await film_service.get_all_films(
         sort=sort,
         filter_genre=filter_genre
     )
@@ -42,10 +38,9 @@ async def search_films(
         query: Optional[str] = Query(default=None),
         page_number: Optional[int] = Query(None, alias='page[number]'),
         page_size: Optional[int] = Query(None, alias='page[size]'),
-        db: AsyncElasticsearch = Depends(get_elastic),
+        film_service: FilmService = Depends(get_film_service),
 ) -> list[FilmShort]:
-    films = FilmService(redis=None, elastic=db)
-    response = await films.get_sorted_films(
+    response = await film_service.get_sorted_films(
         page_size=page_size,
         page_number=page_number,
         query=query,
