@@ -7,7 +7,7 @@ from pydantic import BaseModel
 
 # Объект router, в котором регистрируем обработчики
 from src.db.elastic import get_elastic
-from src.models.film import FilmShort
+from src.models.film import FilmShort, FilmDetail
 from src.services.film import FilmService
 
 router = APIRouter()
@@ -30,9 +30,14 @@ class Film(BaseModel):
 # И адрес запроса будет выглядеть так — /api/v1/film/some_id
 # В сигнатуре функции указываем тип данных, получаемый из адреса запроса (film_id: str)
 # И указываем тип возвращаемого объекта — Film
-@router.get('/{film_id}', response_model=Film)
-async def film_details(film_id: str) -> Film:
-    return Film(id='some_id', title='some_title')
+@router.get('/{film_id}', response_model=FilmDetail)
+async def get_one_film(
+        film_id: str,
+        db: AsyncElasticsearch = Depends(get_elastic),
+) -> FilmDetail:
+    film = FilmService(redis=None, elastic=db)
+    response = await film.get_by_id(film_id=film_id)
+    return FilmDetail(**response)
 
 
 @router.get('/', response_model=list[FilmShort])
@@ -42,7 +47,7 @@ async def get_all_films(
         page_size: Optional[int] = Query(None, alias='page[size]'),
         filter_genre: Optional[str] = Query(None, alias='filter[genre]'),
         db: AsyncElasticsearch = Depends(get_elastic),
-):
+) -> FilmShort:
     films = FilmService(redis=None, elastic=db)
     response = await films.get_all_films(
         sort=sort,

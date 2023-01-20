@@ -1,13 +1,14 @@
 from functools import lru_cache
+from http import HTTPStatus
 from typing import Optional
 
 from aioredis import Redis
 from elasticsearch import AsyncElasticsearch, NotFoundError
-from fastapi import Depends
+from fastapi import Depends, HTTPException
 
 from src.db.elastic import get_elastic
 from src.db.redis import get_redis
-from src.models.film import FilmShort
+from src.models.film import FilmShort, FilmDetail
 
 FILM_CACHE_EXPIRE_IN_SECONDS = 60 * 5  # 5 минут
 
@@ -67,17 +68,19 @@ class FilmService:
         return result
 
     # get_by_id возвращает объект фильма. Он опционален, так как фильм может отсутствовать в базе
-    async def get_by_id(self, film_id: str) -> Optional[FilmShort]:
+    async def get_by_id(self, film_id: str) -> Optional[dict]:
         # Пытаемся получить данные из кеша, потому что оно работает быстрее
-        film = await self._film_from_cache(film_id)
+        # film = await self._film_from_cache(film_id)
+        film = None # пока нет redis
         if not film:
             # Если фильма нет в кеше, то ищем его в Elasticsearch
-            film = await self._get_film_from_elastic(film_id)
-            if not film:
-                # Если он отсутствует в Elasticsearch, значит, фильма вообще нет в базе
-                return None
+            try:
+                film = await self.elastic.get('movies', film_id)
+            except NotFoundError:
+                raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='no film with this id')
+            film = film['_source']
             # Сохраняем фильм  в кеш
-            await self._put_film_to_cache(film)
+            # await self._put_film_to_cache(film)
 
         return film
 
