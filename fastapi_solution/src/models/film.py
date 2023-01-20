@@ -2,6 +2,7 @@ from fastapi import APIRouter
 from pydantic.schema import Optional, List
 
 from src.models.base import AbstractModel
+from src.models.genre import Genre
 from src.models.person import PersonShort
 
 router = APIRouter()
@@ -17,6 +18,6 @@ class FilmDetail(FilmShort):
     actors: Optional[List[PersonShort]] = None
     writers: Optional[List[PersonShort]] = None
     director: Optional[List] = None
-    genre: Optional[List] = None
+    genre: Optional[list[Genre]] = None
     actors_names: Optional[List] = None
     writers_names: Optional[List] = None
