@@ -9,7 +9,12 @@ from src.services.film import FilmService, get_film_service
 router = APIRouter()
 
 
-@router.get('/{film_id}', response_model=FilmDetail)
+@router.get(
+    '/{film_id}',
+    response_model=FilmDetail,
+    description='Film detailed info',
+    summary='Get detailed film by id',
+)
 async def get_one_film(
         film_id: str,
         film_service: FilmService = Depends(get_film_service),
@@ -18,7 +23,12 @@ async def get_one_film(
     return FilmDetail(**response)
 
 
-@router.get('/', response_model=list[FilmShort])
+@router.get(
+    '/',
+    response_model=list[FilmShort],
+    description='All films info',
+    summary='Get all films',
+)
 async def get_all_films(
         sort: Optional[str] = Query(default=None),
         filter_genre: Optional[str] = Query(None, alias='filter[genre]'),
@@ -33,7 +43,12 @@ async def get_all_films(
     return response
 
 
-@router.get('/search/', response_model=list[FilmShort])
+@router.get(
+    '/search/',
+    response_model=list[FilmShort],
+    description='Search films',
+    summary='Search films with pagination and query for title',
+)
 async def search_films(
         query: Optional[str] = Query(default=None),
         page_number: Optional[int] = Query(None, alias='page[number]'),
