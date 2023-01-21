@@ -1,7 +1,7 @@
 from pydantic import Field
-
-from models.base import AbstractModel
 from typing import Optional, List
+
+from src.models.base import AbstractModel
 
 
 class PersonShort(AbstractModel):

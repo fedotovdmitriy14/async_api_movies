@@ -1,4 +1,4 @@
-from models.base import AbstractModel
+from src.models.base import AbstractModel
 
 
 class Genre(AbstractModel):

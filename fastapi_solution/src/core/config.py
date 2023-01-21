@@ -1,9 +1,10 @@
 import os
 from logging import config as logging_config
 
-from logger import LOGGING
 
 # Применяем настройки логирования
+from src.core.logger import LOGGING
+
 logging_config.dictConfig(LOGGING)
 
 # Название проекта. Используется в Swagger-документации
