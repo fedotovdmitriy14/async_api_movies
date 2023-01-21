@@ -70,5 +70,20 @@ services:
     ports:
       - "6379:6379"
 
+  etl:
+    image: i19951/yandex_projects:etl
+    restart: always
+    env_file:
+      - fastapi_solution/src/.env
+    networks:
+      - yandex_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+
 networks:
     yandex_network:
