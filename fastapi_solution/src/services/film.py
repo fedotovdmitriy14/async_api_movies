@@ -18,51 +18,6 @@ FILM_CACHE_EXPIRE_IN_SECONDS = 60 * 5  # 5 минут
 # Никакой магии тут нет. Обычный класс с обычными методами.
 # Этот класс ничего не знает про DI — максимально сильный и независимый.
 class FilmService(BaseService):
-    async def get_all_films(
-            self,
-            sort: Optional[str] = None,
-            filter_genre: Optional[str] = None
-    ):
-        body = {'query': {'match_all': {}}}
-        if filter_genre:
-            body = {
-                'query': {
-                    'bool': {
-                        'must': [
-                            {
-                                'nested': {
-                                    'path': 'genre',
-                                    'query': {
-                                        'bool': {
-                                            'should': [
-                                                {
-                                                    'term':
-                                                        {
-                                                            'genre.id': filter_genre,
-                                                        }
-                                                }
-                                            ]
-                                        }
-                                    },
-                                }
-                            }
-                        ]
-                    }
-                }
-            }
-        if sort:
-            order = 'asc'
-            if sort[0] == '-':
-                order = 'desc'
-                sort = sort[1:]
-            if sort in FilmShort.__annotations__:
-                body.update({'sort': [{sort: {'order': order}}]})
-        document = await self.elastic.search(index='movies', body=body)
-        result = [FilmShort(**hit["_source"]) for hit in document["hits"]["hits"]]
-        if not result:
-            raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='films not found')
-        return result
-
     # get_by_id возвращает объект фильма. Он опционален, так как фильм может отсутствовать в базе
     async def get_by_id(self, film_id: str) -> Optional[FilmDetail]:
         # Пытаемся получить данные из кеша, потому что оно работает быстрее
