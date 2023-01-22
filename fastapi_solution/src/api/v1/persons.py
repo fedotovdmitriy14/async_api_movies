@@ -19,7 +19,10 @@ router = APIRouter()
 async def person_details(
     person_id: str, person_service: PersonService = Depends(get_person_service)
 ) -> Person:
-    person = await person_service.get_by_id(person_id)
+    person = await person_service.get_by_id(
+        id_=person_id,
+        model=Person,
+        index_name='persons')
     if not person:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND, detail="Person with uuid {0} not found".format(person_id)
@@ -29,7 +32,7 @@ async def person_details(
 
 @router.get(
     "/{person_id}/film",
-    response_model=list[PersonShort],
+    response_model=list[FilmShort],
     summary="Get all films by person id",
     description="All films by person id",
 )
@@ -38,7 +41,10 @@ async def person_films(
     person_service: PersonService = Depends(get_person_service),
     film_service: FilmService = Depends(get_film_service),
 ) -> list[FilmShort]:
-    es_person = await person_service.get_by_id(person_id)
+    es_person = await person_service.get_by_id(
+        id_=person_id,
+        model=Person,
+        index_name='persons')
     person_films = await film_service.get_person_films(es_person.film_ids)
     return person_films
 

@@ -9,13 +9,10 @@ from typing import Optional
 from src.db.elastic import get_elastic
 from src.db.redis import get_redis
 from src.models.person import Person, PersonShort
+from src.services.base import BaseService
 
 
-class PersonService:
-    def __init__(self, redis: Redis, elastic: AsyncElasticsearch):
-        self.redis = redis
-        self.elastic = elastic
-
+class PersonService(BaseService):
     async def get_persons(
             self,
             query: Optional[str] = None,
@@ -45,18 +42,6 @@ class PersonService:
             return [Person(**hit["_source"]) for hit in document["hits"]["hits"]]
         except NotFoundError:
             return None
-
-    async def get_by_id(self, person_id: str) -> Optional[Person]:
-        person = None   # пока нет redis
-        if not person:
-            try:
-                person = await self.elastic.get(index='persons', id=person_id)
-            except NotFoundError:
-                raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='no person with this id')
-            person = person['_source']
-            # Сохраняем персону в кеш
-            # await self._put_person_to_cache(film)
-        return Person(**person)
 
 
 @lru_cache()
