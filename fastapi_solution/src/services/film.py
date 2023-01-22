@@ -138,6 +138,13 @@ class FilmService:
         # pydantic позволяет сериализовать модель в json
         await self.redis.set(film.uuid, film.json(), expire=FILM_CACHE_EXPIRE_IN_SECONDS)
 
+    async def get_person_films(self, ids: list[str]):
+        try:
+            res = await self.elastic.mget(body={"ids": ids}, index="movies")
+        except NotFoundError:
+            return []
+        return [FilmShort(**doc["_source"]) for doc in res["docs"]]
+
 
 @lru_cache()
 def get_film_service(
