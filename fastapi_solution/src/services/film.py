@@ -8,7 +8,7 @@ from fastapi import Depends, HTTPException
 
 from src.db.elastic import get_elastic
 from src.db.redis import get_redis
-from src.models.film import FilmShort, FilmDetail
+from src.models.film import FilmShort
 from src.services.base import BaseService
 
 FILM_CACHE_EXPIRE_IN_SECONDS = 60 * 5  # 5 минут
@@ -18,23 +18,6 @@ FILM_CACHE_EXPIRE_IN_SECONDS = 60 * 5  # 5 минут
 # Никакой магии тут нет. Обычный класс с обычными методами.
 # Этот класс ничего не знает про DI — максимально сильный и независимый.
 class FilmService(BaseService):
-    # get_by_id возвращает объект фильма. Он опционален, так как фильм может отсутствовать в базе
-    async def get_by_id(self, film_id: str) -> Optional[FilmDetail]:
-        # Пытаемся получить данные из кеша, потому что оно работает быстрее
-        # film = await self._film_from_cache(film_id)
-        film = None  # пока нет redis
-        if not film:
-            # Если фильма нет в кеше, то ищем его в Elasticsearch
-            try:
-                film = await self.elastic.get('movies', film_id)
-            except NotFoundError:
-                raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='no film with this id')
-            film = film['_source']
-            # Сохраняем фильм  в кеш
-            # await self._put_film_to_cache(film)
-
-        return FilmDetail(**film)
-
     async def get_sorted_films(
             self,
             query: Optional[str] = None,

@@ -2,7 +2,7 @@ from http import HTTPStatus
 from typing import Optional, Type
 
 from aioredis import Redis
-from elasticsearch import AsyncElasticsearch
+from elasticsearch import AsyncElasticsearch, NotFoundError
 from fastapi import HTTPException
 from pydantic import BaseModel
 
@@ -58,3 +58,25 @@ class BaseService:
         if not result:
             raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=f'{index_name} not found')
         return result
+
+    # get_by_id возвращает объект фильма. Он опционален, так как фильм может отсутствовать в базе
+    async def get_by_id(
+            self,
+            id_: str,
+            model: Type[BaseModel],
+            index_name: str,
+    ):
+        # Пытаемся получить данные из кеша, потому что оно работает быстрее
+        # film = await self._film_from_cache(film_id)
+        res = None  # пока нет redis
+        if not res:
+            # Если фильма нет в кеше, то ищем его в Elasticsearch
+            try:
+                res = await self.elastic.get(index_name, id_)
+            except NotFoundError:
+                raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=f'no {index_name} with this id')
+            res = res['_source']
+            # Сохраняем фильм  в кеш
+            # await self._put_film_to_cache(film)
+
+        return model(**res)

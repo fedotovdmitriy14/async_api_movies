@@ -18,7 +18,11 @@ async def get_one_film(
         film_id: str,
         film_service: FilmService = Depends(get_film_service),
 ) -> FilmDetail:
-    return await film_service.get_by_id(film_id=film_id)
+    return await film_service.get_by_id(
+        id_=film_id,
+        model=FilmDetail,
+        index_name='movies',
+    )
 
 
 @router.get(
