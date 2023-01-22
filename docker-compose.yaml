@@ -3,7 +3,7 @@ services:
     build:
       context: ./fastapi_solution
     env_file:
-      - fastapi_solution/src/.env
+      - .env
     depends_on:
       redis:
         condition: service_healthy
@@ -84,7 +84,7 @@ services:
     image: i19951/yandex_projects:etl
     restart: always
     env_file:
-      - fastapi_solution/src/.env
+      - .env
     networks:
       - yandex_network
     depends_on:
