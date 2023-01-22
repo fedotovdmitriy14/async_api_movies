@@ -9,6 +9,7 @@ from fastapi import Depends, HTTPException
 from src.db.elastic import get_elastic
 from src.db.redis import get_redis
 from src.models.film import FilmShort, FilmDetail
+from src.services.base import BaseService
 
 FILM_CACHE_EXPIRE_IN_SECONDS = 60 * 5  # 5 минут
 
@@ -16,11 +17,7 @@ FILM_CACHE_EXPIRE_IN_SECONDS = 60 * 5  # 5 минут
 # FilmService содержит бизнес-логику по работе с фильмами.
 # Никакой магии тут нет. Обычный класс с обычными методами.
 # Этот класс ничего не знает про DI — максимально сильный и независимый.
-class FilmService:
-    def __init__(self, redis: Redis, elastic: AsyncElasticsearch):
-        self.redis = redis
-        self.elastic = elastic
-
+class FilmService(BaseService):
     async def get_all_films(
             self,
             sort: Optional[str] = None,

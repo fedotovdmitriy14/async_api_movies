@@ -32,9 +32,11 @@ async def get_all_films(
         filter_genre: Optional[str] = Query(None, alias='filter[genre]'),
         film_service: FilmService = Depends(get_film_service),
 ) -> list[FilmShort]:
-    return await film_service.get_all_films(
+    return await film_service.get_all(
         sort=sort,
-        filter_genre=filter_genre
+        filter_genre=filter_genre,
+        model=FilmShort,
+        index_name='movies',
     )
 
 

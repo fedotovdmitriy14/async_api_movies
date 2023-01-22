@@ -1,36 +1,15 @@
 from functools import lru_cache
 from aioredis import Redis
-from elasticsearch import AsyncElasticsearch, NotFoundError
+from elasticsearch import AsyncElasticsearch
 from fastapi import Depends
-from typing import Optional
 
 from src.db.elastic import get_elastic
 from src.db.redis import get_redis
-from src.models.genre import Genre
+from src.services.base import BaseService
 
 
-class GenreService:
-    def __init__(self, redis: Redis, elastic: AsyncElasticsearch):
-        self.redis = redis
-        self.elastic = elastic
-
-    async def get_genres(
-            self,
-            sort: Optional[str] = None
-    ) -> Optional[list[Genre]]:
-        body = {'query': {'match_all': {}}}
-        if sort:
-            order = 'asc'
-            if sort[0] == '-':
-                order = 'desc'
-                sort = sort[1:]
-            if sort in Genre.__annotations__:
-                body.update({'sort': [{sort: {'order': order}}]})
-        try:
-            document = await self.elastic.search(index='genres', body=body)
-            return [Genre(**hit["_source"]) for hit in document["hits"]["hits"]]
-        except NotFoundError:
-            return None
+class GenreService(BaseService):
+    pass
 
 
 @lru_cache()
