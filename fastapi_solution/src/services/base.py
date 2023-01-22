@@ -72,7 +72,7 @@ class BaseService:
         if not res:
             # Если фильма нет в кеше, то ищем его в Elasticsearch
             try:
-                res = await self.elastic.get(index_name, id_)
+                res = await self.elastic.get(index=index_name, id=id_)
             except NotFoundError:
                 raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=f'no {index_name} with this id')
             res = res['_source']

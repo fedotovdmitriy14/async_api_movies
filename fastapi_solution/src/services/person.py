@@ -27,8 +27,8 @@ class PersonService:
             body = {
                 'query': {
                     'bool': {
-                        'should': [
-                            {'match': {'full_name': query}},
+                        'must': [
+                            {'match': {'name': query}},
                         ]
                     }
                 }
@@ -46,17 +46,17 @@ class PersonService:
         except NotFoundError:
             return None
 
-    async def get_by_id(self, person_id: str) -> Optional[PersonShort]:
+    async def get_by_id(self, person_id: str) -> Optional[Person]:
         person = None   # пока нет redis
         if not person:
             try:
-                person = await self.elastic.get('persons', person_id)
+                person = await self.elastic.get(index='persons', id=person_id)
             except NotFoundError:
                 raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='no person with this id')
             person = person['_source']
             # Сохраняем персону в кеш
             # await self._put_person_to_cache(film)
-        return PersonShort(**person)
+        return Person(**person)
 
 
 @lru_cache()
