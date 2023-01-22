@@ -1,14 +1,13 @@
 from functools import lru_cache
-from http import HTTPStatus
 
 from aioredis import Redis
 from elasticsearch import AsyncElasticsearch, NotFoundError
-from fastapi import Depends, HTTPException
+from fastapi import Depends
 from typing import Optional
 
 from src.db.elastic import get_elastic
 from src.db.redis import get_redis
-from src.models.person import Person, PersonShort
+from src.models.person import Person
 from src.services.base import BaseService
 
 

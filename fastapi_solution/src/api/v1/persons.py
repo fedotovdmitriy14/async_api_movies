@@ -3,7 +3,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from src.models.film import FilmShort
-from src.models.person import Person, PersonShort
+from src.models.person import Person
 from src.services.film import FilmService, get_film_service
 from src.services.person import PersonService, get_person_service
 
