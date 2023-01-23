@@ -1,7 +1,7 @@
 from functools import lru_cache
 
 from aioredis import Redis
-from elasticsearch import AsyncElasticsearch, NotFoundError
+from elasticsearch import AsyncElasticsearch
 from fastapi import Depends, HTTPException
 from typing import Optional
 from http import HTTPStatus

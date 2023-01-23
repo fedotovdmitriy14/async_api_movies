@@ -1,6 +1,5 @@
-from http import HTTPStatus
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Query
 
 from src.models.film import FilmShort
 from src.models.person import Person
