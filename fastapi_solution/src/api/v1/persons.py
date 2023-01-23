@@ -17,17 +17,13 @@ router = APIRouter()
     description="Person detailed info"
 )
 async def person_details(
-    person_id: str, person_service: PersonService = Depends(get_person_service)
+        person_id: str,
+        person_service: PersonService = Depends(get_person_service)
 ) -> Person:
-    person = await person_service.get_by_id(
+    return await person_service.get_by_id(
         id_=person_id,
         model=Person,
         index_name='persons')
-    if not person:
-        raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND, detail="Person with uuid {0} not found".format(person_id)
-        )
-    return person
 
 
 @router.get(
@@ -45,8 +41,7 @@ async def person_films(
         id_=person_id,
         model=Person,
         index_name='persons')
-    person_films = await film_service.get_person_films(es_person.film_ids)
-    return person_films
+    return await film_service.get_person_films(es_person.film_ids)
 
 
 @router.get(
@@ -61,7 +56,4 @@ async def search_person(
     page_size: Optional[int] = Query(None, alias='page[size]'),
     person_service: PersonService = Depends(get_person_service),
 ) -> Optional[list[Person]]:
-    es_persons = await person_service.get_persons(query=query, page_number=page_number, page_size=page_size)
-    if not es_persons:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='persons not found')
-    return es_persons
+    return await person_service.get_persons(query=query, page_number=page_number, page_size=page_size)

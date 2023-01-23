@@ -2,8 +2,9 @@ from functools import lru_cache
 
 from aioredis import Redis
 from elasticsearch import AsyncElasticsearch, NotFoundError
-from fastapi import Depends
+from fastapi import Depends, HTTPException
 from typing import Optional
+from http import HTTPStatus
 
 from src.db.elastic import get_elastic
 from src.db.redis import get_redis
@@ -36,11 +37,11 @@ class PersonService(BaseService):
                     'from': (page_number - 1) * page_size,
                 }
             )
-        try:
-            document = await self.elastic.search(index='persons', body=body)
-            return [Person(**hit["_source"]) for hit in document["hits"]["hits"]]
-        except NotFoundError:
-            return None
+        document = await self.elastic.search(index='persons', body=body)
+        result = [Person(**hit["_source"]) for hit in document["hits"]["hits"]]
+        if not result:
+            raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='persons not found')
+        return result
 
 
 @lru_cache()
