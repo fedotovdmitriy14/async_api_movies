@@ -98,7 +98,7 @@ class BaseService:
     async def get_by_id(
             self,
             id_: str,
-            model: ES_models,
+            model: Union[Models],
             index_name: str,
     ):
         # Пытаемся получить данные из кеша, потому что оно работает быстрее
