@@ -11,8 +11,6 @@ from src.db.redis import get_redis
 from src.models.film import FilmShort
 from src.services.base import BaseService
 
-FILM_CACHE_EXPIRE_IN_SECONDS = 60 * 5  # 5 минут
-
 
 # FilmService содержит бизнес-логику по работе с фильмами.
 # Никакой магии тут нет. Обычный класс с обычными методами.
