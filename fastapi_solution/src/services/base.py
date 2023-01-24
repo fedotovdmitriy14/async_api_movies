@@ -12,7 +12,6 @@ from src.models.genre import Genre
 from src.models.person import PersonShort, Person
 
 Models = (FilmShort, FilmDetail, Genre, PersonShort, Person)
-ES_models = Union[Models]
 
 
 class BaseService:
@@ -20,7 +19,7 @@ class BaseService:
         self.redis = redis
         self.elastic = elastic
 
-    async def _data_from_cache(self, index_name: str, model: ES_models, item_id: str) -> Optional[ES_models]:
+    async def _data_from_cache(self, index_name: str, model: Union[Models], item_id: str) -> Optional[Union[Models]]:
         # Пытаемся получить данные о фильме из кеша, используя команду get
         # https://redis.io/commands/get
         data = await self.redis.get(f'{index_name}::{item_id}')
@@ -30,7 +29,7 @@ class BaseService:
         # pydantic предоставляет удобное API для создания объекта моделей из json
         return model.parse_raw(data)
 
-    async def _put_data_to_cache(self, index_name: str, model: ES_models):
+    async def _put_data_to_cache(self, index_name: str, model: Union[Models]):
         # Сохраняем данные о фильме, используя команду set
         # Выставляем время жизни кеша — 5 минут
         # https://redis.io/commands/set
