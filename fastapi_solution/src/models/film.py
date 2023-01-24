@@ -18,6 +18,6 @@ class FilmDetail(FilmShort):
     actors: Optional[List[PersonShort]] = None
     writers: Optional[List[PersonShort]] = None
     director: Optional[List] = None
-    genre: Optional[list[Genre]] = None
+    genre: Optional[List[Genre]] = None
     actors_names: Optional[List] = None
     writers_names: Optional[List] = None

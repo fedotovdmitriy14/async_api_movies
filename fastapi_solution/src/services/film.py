@@ -8,7 +8,8 @@ from fastapi import Depends, HTTPException
 
 from src.db.elastic import get_elastic
 from src.db.redis import get_redis
-from src.models.film import FilmShort, FilmDetail
+from src.models.film import FilmShort
+from src.services.base import BaseService
 
 FILM_CACHE_EXPIRE_IN_SECONDS = 60 * 5  # 5 минут
 
@@ -16,73 +17,7 @@ FILM_CACHE_EXPIRE_IN_SECONDS = 60 * 5  # 5 минут
 # FilmService содержит бизнес-логику по работе с фильмами.
 # Никакой магии тут нет. Обычный класс с обычными методами.
 # Этот класс ничего не знает про DI — максимально сильный и независимый.
-class FilmService:
-    def __init__(self, redis: Redis, elastic: AsyncElasticsearch):
-        self.redis = redis
-        self.elastic = elastic
-
-    async def get_all_films(
-            self,
-            sort: Optional[str] = None,
-            filter_genre: Optional[str] = None
-    ):
-        body = {'query': {'match_all': {}}}
-        if filter_genre:
-            body = {
-                'query': {
-                    'bool': {
-                        'must': [
-                            {
-                                'nested': {
-                                    'path': 'genre',
-                                    'query': {
-                                        'bool': {
-                                            'should': [
-                                                {
-                                                    'term':
-                                                        {
-                                                            'genre.id': filter_genre,
-                                                        }
-                                                }
-                                            ]
-                                        }
-                                    },
-                                }
-                            }
-                        ]
-                    }
-                }
-            }
-        if sort:
-            order = 'asc'
-            if sort[0] == '-':
-                order = 'desc'
-                sort = sort[1:]
-            if sort in FilmShort.__annotations__:
-                body.update({'sort': [{sort: {'order': order}}]})
-        document = await self.elastic.search(index='movies', body=body)
-        result = [FilmShort(**hit["_source"]) for hit in document["hits"]["hits"]]
-        if not result:
-            raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='films not found')
-        return result
-
-    # get_by_id возвращает объект фильма. Он опционален, так как фильм может отсутствовать в базе
-    async def get_by_id(self, film_id: str) -> Optional[FilmDetail]:
-        # Пытаемся получить данные из кеша, потому что оно работает быстрее
-        # film = await self._film_from_cache(film_id)
-        film = None  # пока нет redis
-        if not film:
-            # Если фильма нет в кеше, то ищем его в Elasticsearch
-            try:
-                film = await self.elastic.get('movies', film_id)
-            except NotFoundError:
-                raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='no film with this id')
-            film = film['_source']
-            # Сохраняем фильм  в кеш
-            # await self._put_film_to_cache(film)
-
-        return FilmDetail(**film)
-
+class FilmService(BaseService):
     async def get_sorted_films(
             self,
             query: Optional[str] = None,
@@ -137,6 +72,13 @@ class FilmService:
         # https://redis.io/commands/set
         # pydantic позволяет сериализовать модель в json
         await self.redis.set(film.uuid, film.json(), expire=FILM_CACHE_EXPIRE_IN_SECONDS)
+
+    async def get_person_films(self, ids: list[str]):
+        try:
+            res = await self.elastic.mget(body={"ids": ids}, index="movies")
+        except NotFoundError:
+            return []
+        return [FilmShort(**doc["_source"]) for doc in res["docs"]]
 
 
 @lru_cache()
