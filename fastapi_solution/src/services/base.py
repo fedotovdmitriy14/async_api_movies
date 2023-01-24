@@ -88,6 +88,13 @@ class BaseService:
             raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=f'{index_name} not found')
         return result
 
+    async def _get_data_from_elastic(self, index_name: str, item_id: str) -> Optional[dict]:
+        try:
+            doc = await self.elastic.get(index=index_name, id=item_id)
+        except NotFoundError:
+            return None
+        return doc['_source']
+
     # get_by_id возвращает объект фильма. Он опционален, так как фильм может отсутствовать в базе
     async def get_by_id(
             self,
@@ -99,11 +106,8 @@ class BaseService:
         res = await self._data_from_cache(index_name, model, id_)
         if not res:
             # Если фильма нет в кеше, то ищем его в Elasticsearch
-            try:
-                res = await self.elastic.get(index=index_name, id=id_)
-            except NotFoundError:
-                raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=f'no {index_name} with this id')
-            res = res['_source']
+            res = await self._get_data_from_elastic(index_name, id_)
+
             # Сохраняем фильм  в кеш
             await self._put_data_to_cache(index_name, rec := model(**res))
             return rec

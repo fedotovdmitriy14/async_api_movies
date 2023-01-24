@@ -46,31 +46,6 @@ class FilmService(BaseService):
             raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='films not found')
         return result
 
-    async def _get_film_from_elastic(self, film_id: str) -> Optional[FilmShort]:
-        try:
-            doc = await self.elastic.get('movies', film_id)
-        except NotFoundError:
-            return None
-        return FilmShort(**doc['_source'])
-
-    async def _film_from_cache(self, film_id: str) -> Optional[FilmShort]:
-        # Пытаемся получить данные о фильме из кеша, используя команду get
-        # https://redis.io/commands/get
-        data = await self.redis.get(film_id)
-        if not data:
-            return None
-
-        # pydantic предоставляет удобное API для создания объекта моделей из json
-        film = FilmShort.parse_raw(data)
-        return film
-
-    async def _put_film_to_cache(self, film: FilmShort):
-        # Сохраняем данные о фильме, используя команду set
-        # Выставляем время жизни кеша — 5 минут
-        # https://redis.io/commands/set
-        # pydantic позволяет сериализовать модель в json
-        await self.redis.set(film.uuid, film.json(), expire=FILM_CACHE_EXPIRE_IN_SECONDS)
-
     async def get_person_films(self, ids: list[str]):
         try:
             res = await self.elastic.mget(body={"ids": ids}, index="movies")
