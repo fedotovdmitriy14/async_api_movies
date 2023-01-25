@@ -15,9 +15,9 @@ from src.services.base import BaseService
 class PersonService(BaseService):
     async def get_persons(
             self,
+            page_number: int,
+            page_size: int,
             query: Optional[str] = None,
-            page_number: Optional[int] = None,
-            page_size: Optional[int] = None,
     ) -> Optional[list[Person]]:
         body = {'query': {'match_all': {}}}
         if query:

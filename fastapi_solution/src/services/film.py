@@ -15,9 +15,9 @@ from src.services.base import BaseService
 class FilmService(BaseService):
     async def get_sorted_films(
             self,
+            page_number: int,
+            page_size: int,
             query: Optional[str] = None,
-            page_number: Optional[int] = None,
-            page_size: Optional[int] = None,
     ) -> Optional[list[FilmShort]]:
         """достает фильмы из эластика, учитывая сортировку по переданным параметрам"""
         body = {'query': {'match_all': {}}}
