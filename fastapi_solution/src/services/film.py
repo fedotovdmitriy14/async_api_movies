@@ -12,9 +12,6 @@ from src.models.film import FilmShort
 from src.services.base import BaseService
 
 
-# FilmService содержит бизнес-логику по работе с фильмами.
-# Никакой магии тут нет. Обычный класс с обычными методами.
-# Этот класс ничего не знает про DI — максимально сильный и независимый.
 class FilmService(BaseService):
     async def get_sorted_films(
             self,
@@ -22,6 +19,7 @@ class FilmService(BaseService):
             page_number: Optional[int] = None,
             page_size: Optional[int] = None,
     ) -> Optional[list[FilmShort]]:
+        """достает фильмы из эластика, учитывая сортировку по переданным параметрам"""
         body = {'query': {'match_all': {}}}
         if query:
             body = {
@@ -46,7 +44,8 @@ class FilmService(BaseService):
             raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='films not found')
         return result
 
-    async def get_person_films(self, ids: list[str]):
+    async def get_person_films(self, ids: list[str]) -> list[FilmShort]:
+        """поиск фильмов по персонам в них"""
         try:
             res = await self.elastic.mget(body={"ids": ids}, index="movies")
         except NotFoundError:
