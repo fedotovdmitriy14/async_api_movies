@@ -51,8 +51,8 @@ async def person_films(
 )
 async def search_person(
     query: Optional[str] = Query(default=None),
-    page_number: Optional[int] = Query(None, alias='page[number]', default=1, gt=0),
-    page_size: Optional[int] = Query(None, alias='page[size]', default=10, gt=0, lt=10000),
+    page_number: Optional[int] = Query(alias='page[number]', default=1, gt=0),
+    page_size: Optional[int] = Query(alias='page[size]', default=10, gt=0, lt=10000),
     person_service: PersonService = Depends(get_person_service),
 ) -> Optional[list[Person]]:
     return await person_service.get_persons(query=query, page_number=page_number, page_size=page_size)
