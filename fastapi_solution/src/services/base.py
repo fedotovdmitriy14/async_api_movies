@@ -6,7 +6,7 @@ from elasticsearch import AsyncElasticsearch, NotFoundError
 from fastapi import HTTPException
 from pydantic import BaseModel
 
-from src.core.config import REDIS_CACHE_TIME
+from src.core.config import settings
 from src.models.film import FilmShort, FilmDetail
 from src.models.genre import Genre
 from src.models.person import PersonShort, Person
@@ -32,7 +32,7 @@ class BaseService:
         await self.redis.set(
             f'{index_name}::{model.uuid}',
             model.json(),
-            expire=REDIS_CACHE_TIME
+            expire=settings.redis_cache_time
         )
 
     async def get_all(

@@ -31,13 +31,12 @@ class FilmService(BaseService):
                     }
                 }
             }
-        if page_number and page_size and 10000 > page_size >= 0 and page_number > 0:
-            body.update(
-                {
-                    'size': page_size,
-                    'from': (page_number - 1) * page_size,
-                }
-            )
+        body.update(
+            {
+                'size': page_size,
+                'from': (page_number - 1) * page_size,
+            }
+        )
         document = await self.elastic.search(index='movies', body=body)
         result = [FilmShort(**hit["_source"]) for hit in document["hits"]["hits"]]
         if not result:
