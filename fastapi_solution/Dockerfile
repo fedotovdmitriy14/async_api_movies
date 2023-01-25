@@ -1,4 +1,4 @@
-FROM python:3.9.0-slim-buster
+FROM python:3.10-slim-buster
 
 WORKDIR app
 
@@ -12,4 +12,5 @@ EXPOSE 8000
 
 COPY . .
 
-CMD ["uvicorn", "main:app", "--host=0.0.0.0", "--port=8000"]
+ENTRYPOINT ["gunicorn"]
+CMD ["-b", "0.0.0.0:8000", "-w", "4", "-k", "uvicorn.workers.UvicornH11Worker", "main:app"]
