@@ -1,3 +1,4 @@
+import json
 from http import HTTPStatus
 from typing import Optional, Type, Union
 
@@ -27,11 +28,11 @@ class BaseService:
 
         return model.parse_raw(data)
 
-    async def _put_data_to_cache(self, index_name: str, model: Union[Models]):
+    async def _put_data_to_cache(self, index_name: str, model: dict):
         """кладем запись в кеш"""
         await self.redis.set(
-            f'{index_name}::{model.uuid}',
-            model.json(),
+            f'{index_name}::{model["id"]}',
+            json.dumps(model),
             expire=settings.redis_cache_time
         )
 
@@ -89,7 +90,7 @@ class BaseService:
             model: Union[Models],
             index_name: str,
     ):
-        """проверяется, есть ли фзапись в кеше; если нет - достается из эластика"""
+        """проверяется, есть ли запись в кеше; если нет - достается из эластика"""
         res = await self._data_from_cache(index_name, model, id_)
         if not res:
             try:
@@ -98,7 +99,7 @@ class BaseService:
                 raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=f'no {index_name} with this id')
             res = res['_source']
 
-            await self._put_data_to_cache(index_name, rec := model(**res))
-            return rec
+            await self._put_data_to_cache(index_name, res)
+            return model(**res)
 
         return res
