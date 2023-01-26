@@ -52,8 +52,8 @@ async def get_all_films(
 )
 async def search_films(
         query: Optional[str] = Query(default=None),
-        page_number: Optional[int] = Query(None, alias='page[number]'),
-        page_size: Optional[int] = Query(None, alias='page[size]'),
+        page_number: Optional[int] = Query(alias='page[number]', default=1, gt=0),
+        page_size: Optional[int] = Query(alias='page[size]', default=10, gt=0, lt=10000),
         film_service: FilmService = Depends(get_film_service),
 ) -> list[FilmShort]:
     return await film_service.get_sorted_films(

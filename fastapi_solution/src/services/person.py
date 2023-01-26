@@ -15,9 +15,9 @@ from src.services.base import BaseService
 class PersonService(BaseService):
     async def get_persons(
             self,
+            page_number: int,
+            page_size: int,
             query: Optional[str] = None,
-            page_number: Optional[int] = None,
-            page_size: Optional[int] = None,
     ) -> Optional[list[Person]]:
         body = {'query': {'match_all': {}}}
         if query:
@@ -30,13 +30,12 @@ class PersonService(BaseService):
                     }
                 }
             }
-        if page_number and page_size and 10000 > page_size >= 0 and page_number > 0:
-            body.update(
-                {
-                    'size': page_size,
-                    'from': (page_number - 1) * page_size,
-                }
-            )
+        body.update(
+            {
+                'size': page_size,
+                'from': (page_number - 1) * page_size,
+            }
+        )
         document = await self.elastic.search(index='persons', body=body)
         result = [Person(**hit["_source"]) for hit in document["hits"]["hits"]]
         if not result:
