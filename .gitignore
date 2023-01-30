@@ -105,9 +105,11 @@ celerybeat.pid
 
 # Environments
 .env
+.env.api
 .env.db
 .venv
 env/
+pg_data/
 venv/
 ENV/
 env.bak/
