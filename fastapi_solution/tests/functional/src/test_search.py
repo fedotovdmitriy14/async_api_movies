@@ -14,7 +14,7 @@ from tests.functional.settings import test_settings
 #  Любой тест с асинхронными вызовами нужно оборачивать декоратором `pytest.mark.asyncio`, который следит за запуском и работой цикла событий.
 
 @pytest.mark.asyncio
-async def test_search():
+async def test_search(es_write_data):
     # 1. Генерируем данные для ES
 
     es_data = [{
@@ -39,14 +39,7 @@ async def test_search():
         'film_work_type': 'movie'
     } for _ in range(60)]
 
-    bulk_query = []
-    for row in es_data:
-        bulk_query.extend([
-            json.dumps({'index': {'_index': 'test_movies', '_id': row['id']}}),
-            json.dumps(row)
-        ])
-
-    str_query = '\n'.join(bulk_query) + '\n'
+    await es_write_data(es_data)
 
     # 2. Загружаем данные в ES
 
