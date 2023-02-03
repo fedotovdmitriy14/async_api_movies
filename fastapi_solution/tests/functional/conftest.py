@@ -1,9 +1,10 @@
+import asyncio
 from typing import List
 
 import aiohttp
 import aioredis
 import pytest
-from elasticsearch import AsyncElasticsearch
+from elasticsearch import AsyncElasticsearch, helpers
 
 from tests.functional.settings import test_settings
 from tests.functional.utils.helpers import get_es_bulk_query
@@ -31,12 +32,15 @@ async def redis_client():
 @pytest.fixture
 def es_write_data(es_client):
 
-    async def inner(data: List[dict]):
-        bulk_query = get_es_bulk_query(data, test_settings.es_index, test_settings.es_id_field)
+    async def inner(data: List[dict], es_index: str):
+        bulk_query = get_es_bulk_query(data, es_index)
         client = await es_client()
         response = await client.bulk(bulk_query, refresh=True)
         if response['errors']:
             raise Exception('Ошибка записи данных в Elasticsearch')
+        await asyncio.sleep(1)
+        yield data
+        await helpers.async_bulk(es_client, [{'_op_type': 'delete', '_index': es_index, '_id': item['id']} for item in data])
     return inner
 
 
