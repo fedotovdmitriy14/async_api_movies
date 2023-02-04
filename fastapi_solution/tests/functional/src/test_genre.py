@@ -1,3 +1,5 @@
+from http import HTTPStatus
+
 import pytest
 
 
@@ -22,13 +24,22 @@ async def test_get_genre_not_valid(make_get_request, uuid):
 
 
 @pytest.mark.asyncio
-async def test_get_genre(es_write_data, make_get_request, es_delete_data, get_redis_data, clear_redis_cash):
+async def test_get_genre(es_write_data, make_get_request):
     await es_write_data(data, index)
+    genre_id = data[0].get('id')
     response = await make_get_request(method=index, params=data[0])
-    assert response.body['id'] == data[0]['id']
-    assert response.body['name'] == data[0]['name']
-    await es_delete_data(method=index, params=data[0])
-    redis_data = await get_redis_data(index, data[0]['id'])
-    assert redis_data['id'] == data[0]['id']
-    assert redis_data['name'] == data[0]['name']
-    await clear_redis_cash(index, data[0]['id'])
+    assert response.status == HTTPStatus.OK
+    assert response.body['uuid'] == genre_id
+    assert response.body['name'] == data[0].get('name')
+
+
+@pytest.mark.asyncio
+async def test_get_cache_genre(es_write_data, es_client, make_get_request, redis_client):
+    await es_write_data(data, index)
+    genre_id = data[0].get('id')
+    response_1 = await make_get_request(f'/genres/{genre_id}/')
+    assert response_1.status == HTTPStatus.OK
+    await es_client.delete('genres', genre_id)
+    response_2 = await make_get_request(f'/genres/{genre_id}/')
+    assert response_2.status == HTTPStatus.OK
+    assert response_1.body == response_2.body
