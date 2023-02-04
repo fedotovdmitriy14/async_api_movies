@@ -85,4 +85,3 @@ def make_get_request(client_session):
             status = response.status
         return dict(body=body, headers=headers, status=status)
     return inner
-
