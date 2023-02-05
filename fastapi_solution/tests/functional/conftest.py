@@ -4,7 +4,7 @@ from typing import List, Optional
 import aiohttp
 import aioredis
 import pytest
-from elasticsearch import AsyncElasticsearch, helpers
+from elasticsearch import AsyncElasticsearch
 
 from tests.functional.settings import test_settings
 from tests.functional.utils.helpers import get_es_bulk_query
@@ -19,15 +19,6 @@ async def es_client():
     client = AsyncElasticsearch(hosts=[f'http://{test_settings.elastic_host}:{test_settings.elastic_port}'])
     yield client
     await client.close()
-
-
-@pytest_asyncio.fixture(scope='session')
-async def redis_client():
-    await wait_for_redis()
-    client = await aioredis.create_redis_pool((test_settings.redis_host, test_settings.redis_port),
-                                              minsize=10, maxsize=20)
-    yield client
-    client.close()
 
 
 @pytest_asyncio.fixture
@@ -59,10 +50,10 @@ async def client_session():
 
 
 @pytest_asyncio.fixture
-def make_get_request(client_session):
+def make_get_request(client_session_):
     async def inner(method: str, params: Optional[dict]):
         url = f'http://{test_settings.elastic_host}:{test_settings.elastic_port}/api/v1/{method}'
-        async with client_session.get(url, params=params) as response:
+        async with client_session_.get(url, params=params) as response:
             body = await response.json()
             headers = response.headers
             status = response.status

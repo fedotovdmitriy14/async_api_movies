@@ -34,7 +34,7 @@ async def test_get_genre(es_write_data, make_get_request):
 
 
 @pytest.mark.asyncio
-async def test_get_cache_genre(es_write_data, es_client, make_get_request, redis_client):
+async def test_get_cache_genre(es_write_data, es_client, make_get_request):
     await es_write_data(data, index)
     genre_id = data[0].get('id')
     response_1 = await make_get_request(f'/genres/{genre_id}/')
