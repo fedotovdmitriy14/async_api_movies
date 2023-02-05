@@ -13,7 +13,7 @@ import pytest_asyncio
 
 @pytest_asyncio.fixture(scope='session')
 async def es_client():
-    await wait_for_es()
+    wait_for_es()
     client = AsyncElasticsearch(hosts=[f'http://{test_settings.elastic_host}:{test_settings.elastic_port}'])
     yield client
     await client.close()
@@ -28,6 +28,7 @@ def es_write_data(es_client):
         if response['errors']:
             raise Exception('Ошибка записи данных в Elasticsearch')
         await asyncio.sleep(1)
+        yield
     return inner
 
 
@@ -48,12 +49,12 @@ async def client_session():
 
 
 @pytest_asyncio.fixture
-def make_get_request(client_session_):
+def make_get_request(client_session):
     async def inner(method: str, params: dict = None):
         if not params:
             params = {}
-        url = f'http://{test_settings.elastic_host}:{test_settings.elastic_port}/api/v1/{method}'
-        async with client_session_.get(url, params=params) as response:
+        url = f'http://{test_settings.elastic_host}:{test_settings.fastapi_port}/api/v1/{method}'
+        async with client_session.get(url, params=params) as response:
             body = await response.json()
             headers = response.headers
             status = response.status

@@ -9,9 +9,9 @@ data = [{'id': 'b58ay2b8-d644-7581-cmy9-2astry34343', 'name': 'Test genre'}]
 
 @pytest.mark.asyncio
 async def test_get_all_genres(make_get_request):
-    response = await make_get_request(method=index, params={})
-    assert response.status == 200
-    assert len(response.body) > 1
+    response = await make_get_request(method=index)
+    assert response.get('status') == 200
+    assert len(response.get('body')) > 1
 
 
 @pytest.mark.asyncio
@@ -20,17 +20,17 @@ async def test_get_all_genres(make_get_request):
 ))
 async def test_get_genre_not_valid(make_get_request, uuid):
     response = await make_get_request(f'{index}/{uuid}')
-    assert response.status != 200
+    assert response.get('status') == 404
 
 
 @pytest.mark.asyncio
 async def test_get_genre(es_write_data, make_get_request):
-    await es_write_data(data, index)
+    es_write_data(data, index)
     genre_id = data[0].get('id')
-    response = await make_get_request(method=index, params=data[0])
-    assert response.status == HTTPStatus.OK
-    assert response.body['uuid'] == genre_id
-    assert response.body['name'] == data[0].get('name')
+    response = await make_get_request(method=index, params=data[0]['id'])
+    assert response.get('status') == 200
+    assert response.get['body']['uuid'] == genre_id
+    assert response.get['body']['name'] == data[0].get('name')
 
 
 @pytest.mark.asyncio
