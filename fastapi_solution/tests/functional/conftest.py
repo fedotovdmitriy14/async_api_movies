@@ -2,14 +2,12 @@ import asyncio
 from typing import List, Optional
 
 import aiohttp
-import aioredis
 import pytest
 from elasticsearch import AsyncElasticsearch
 
 from tests.functional.settings import test_settings
 from tests.functional.utils.helpers import get_es_bulk_query
 from tests.functional.utils.wait_for_es import wait_for_es
-from tests.functional.utils.wait_for_redis import wait_for_redis
 import pytest_asyncio
 
 
