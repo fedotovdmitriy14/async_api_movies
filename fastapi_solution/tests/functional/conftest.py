@@ -1,5 +1,5 @@
 import asyncio
-from typing import List
+from typing import List, Optional
 
 import aiohttp
 import aioredis
@@ -50,10 +50,9 @@ async def client_session():
 
 @pytest.fixture
 def make_get_request(client_session):
-    async def inner(method: str, params: dict):
+    async def inner(method: str, params: Optional[dict]):
         url = f'http://{test_settings.elastic_host}:{test_settings.elastic_port}/api/v1/{method}'
-        session = await client_session()
-        async with session.get(url, params=params) as response:
+        async with client_session.get(url, params=params) as response:
             body = await response.json()
             headers = response.headers
             status = response.status

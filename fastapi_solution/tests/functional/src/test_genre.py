@@ -9,7 +9,7 @@ data = [{'id': 'b58ay2b8-d644-7581-cmy9-2astry34343', 'name': 'Test genre'}]
 
 @pytest.mark.asyncio
 async def test_get_all_genres(make_get_request):
-    response = await make_get_request(method=index)
+    response = await make_get_request(method=index, params={})
     assert response.status == 200
     assert len(response.body) > 1
 
