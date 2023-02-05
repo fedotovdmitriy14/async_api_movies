@@ -49,7 +49,9 @@ async def client_session():
 
 @pytest_asyncio.fixture
 def make_get_request(client_session_):
-    async def inner(method: str, params: Optional[dict]):
+    async def inner(method: str, params: dict = None):
+        if not params:
+            params = {}
         url = f'http://{test_settings.elastic_host}:{test_settings.elastic_port}/api/v1/{method}'
         async with client_session_.get(url, params=params) as response:
             body = await response.json()
