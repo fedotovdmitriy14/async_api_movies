@@ -3,7 +3,7 @@ from http import HTTPStatus
 import pytest
 
 
-index = 'genre'
+index = 'genres'
 data = [{'id': 'b58ay2b8-d644-7581-cmy9-2astry34343', 'name': 'Test genre'}]
 
 
