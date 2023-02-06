@@ -2,6 +2,7 @@ from http import HTTPStatus
 
 import pytest
 
+from tests.functional.utils.helpers import make_get_request, es_write_data
 
 index = 'genres'
 data = [{'id': 'b58ay2b8-d644-7581-cmy9-2astry34343', 'name': 'Test genre'}]
@@ -24,13 +25,13 @@ async def test_get_genre_not_valid(make_get_request, uuid):
 
 
 @pytest.mark.asyncio
-async def test_get_genre(es_write_data, make_get_request):
-    es_write_data(data, index)
+async def test_get_genre(es_client, client_session):
+    await es_write_data(es_client, data, index)
     genre_id = data[0].get('id')
-    response = await make_get_request(method=index, params=data[0]['id'])
+    response = await make_get_request(client_session, method=f'{index}/{genre_id}')
     assert response.get('status') == 200
-    assert response.get['body']['uuid'] == genre_id
-    assert response.get['body']['name'] == data[0].get('name')
+    assert response.get('body')['uuid'] == genre_id
+    assert response.get('body')['name'] == data[0].get('name')
 
 
 @pytest.mark.asyncio
