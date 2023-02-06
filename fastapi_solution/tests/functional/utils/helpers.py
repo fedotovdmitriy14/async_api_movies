@@ -30,6 +30,6 @@ async def make_get_request(client_session, method: str, params: dict = None):
 
 async def es_write_data(es_client, data: List[dict], es_index: str):
     try:
-        await async_bulk(es_client, data, index=es_index)
+        await async_bulk(es_client, data, index=es_index, refresh=True)
     except BulkIndexError:
         raise Exception('Ошибка записи данных в Elasticsearch')

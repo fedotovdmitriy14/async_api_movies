@@ -5,12 +5,12 @@ import pytest
 from tests.functional.utils.helpers import make_get_request, es_write_data
 
 index = 'genres'
-data = [{'id': 'b58ay2b8-d644-7581-cmy9-2astry34343', 'name': 'Test genre'}]
+data = [{'id': 'b58ay2b8-d644-7581-cmy9-2astry34343', 'name': 'Test genre'},]
 
 
 @pytest.mark.asyncio
-async def test_get_all_genres(make_get_request):
-    response = await make_get_request(method=index)
+async def test_get_all_genres(client_session):
+    response = await make_get_request(client_session, method=index)
     assert response.get('status') == 200
     assert len(response.get('body')) > 1
 
@@ -19,8 +19,8 @@ async def test_get_all_genres(make_get_request):
 @pytest.mark.parametrize('uuid', (
     '00af52ec-9345-4d66-adbe-50eb917f463a', 'not_valid_uuid'
 ))
-async def test_get_genre_not_valid(make_get_request, uuid):
-    response = await make_get_request(f'{index}/{uuid}')
+async def test_get_genre_not_valid(client_session, uuid):
+    response = await make_get_request(client_session, f'{index}/{uuid}')
     assert response.get('status') == 404
 
 
