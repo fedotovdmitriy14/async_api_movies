@@ -12,7 +12,6 @@ import pytest_asyncio
 
 @pytest_asyncio.fixture(scope='session')
 async def es_client():
-    wait_for_es()
     client = AsyncElasticsearch(hosts=[f'http://{test_settings.elastic_host}:{test_settings.elastic_port}'])
     yield client
     await client.close()
