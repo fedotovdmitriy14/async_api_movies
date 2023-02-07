@@ -42,5 +42,5 @@ async def test_get_cache_genre(client_session, es_client):
     assert response_1.get('status') == HTTPStatus.OK
     await es_client.delete('genres', genre_id)
     response_2 = await make_get_request(client_session, method=f'{index}/{genre_id}')
-    assert response_2.status == HTTPStatus.OK
-    assert response_1.body == response_2.body
+    assert response_2['status'] == HTTPStatus.OK
+    assert response_1['body'] == response_2['body']
