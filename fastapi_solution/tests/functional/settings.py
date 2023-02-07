@@ -6,6 +6,7 @@ class TestSettings(BaseSettings):
     redis_port: str = Field("6379", env="REDIS_PORT")
     elastic_host: str = Field("127.0.0.1", env="ELASTIC_HOST")
     elastic_port: str = Field("9200", env="ELASTIC_PORT")
+    fastapi_port: str = Field("8081", env="FASTAPI_PORT")
 
     class Config:
         env_file = '.env'
