@@ -2,7 +2,6 @@ import json
 from typing import List
 
 from elasticsearch.helpers import async_bulk, BulkIndexError
-from elasticsearch.helpers import bulk
 
 from tests.functional.settings import test_settings
 

@@ -1,12 +1,10 @@
 import asyncio
-from typing import List
 
 import aiohttp
 import pytest
 from elasticsearch import AsyncElasticsearch
 
 from tests.functional.settings import test_settings
-from tests.functional.utils.wait_for_es import wait_for_es
 import pytest_asyncio
 
 
