@@ -95,3 +95,21 @@ async def test_get_persons_film(es_client, client_session):
     assert response.get('status') == 200
     assert response.get('body')[0]['id'] == film_id
     assert response.get('body')[0]['title'] == film_data[0].get('title')
+
+
+@pytest.mark.asyncio
+async def test_get_all_persons_search_with_pagination(client_session):
+    params = {'page[size]': 1, 'page[number]': 1}
+    response = await make_get_request(client_session, method=search_film_url_path, params=params)
+    assert response.get('status') == 200
+    assert len(response.get('body')) == 1
+
+
+@pytest.mark.asyncio
+async def test_search_persons_by_title(es_client, client_session):
+    params = {'query': 'Test Person'}
+    await es_write_data(es_client, data, es_index=index)
+    person_id = data[0].get('id')
+    response = await make_get_request(client_session, method=f'{search_film_url_path}', params=params)
+    assert response.get('status') == 200
+    assert response.get('body')[0]['id'] == person_id
