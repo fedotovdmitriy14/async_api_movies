@@ -1,0 +1,50 @@
+services:
+  fastapi_service:
+    build:
+      context: ../../
+    env_file:
+      - .env
+    depends_on:
+      redis:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+
+  elasticsearch:
+    image: elasticsearch:8.5.3
+    environment:
+      discovery.type: "single-node"
+      ES_JAVA_OPTS: -Xms1g -Xmx1g
+      xpack.security.enabled: "false"
+      USE_SSL: "false"
+    ports:
+      - "9200:9200"
+    healthcheck:
+      test: curl -u elastic:elastic -s -f elasticsearch:9200/_cat/health >/dev/null || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7.0.8
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    ports:
+      - "6379:6379"
+
+  tests:
+    build: .
+    env_file:
+      - .env
+    depends_on:
+      fastapi_service:
+        condition: service_started
+    entrypoint: sh -c "pytest"
