@@ -12,7 +12,7 @@ data = [{'id': '0031feab-8f53-412a-8f53-47098a60ac73', 'name': 'Test genre'},]
 async def test_get_all_genres(client_session):
     response = await make_get_request(client_session, method=index)
     assert response.get('status') == 200
-    assert len(response.get('body')) > 1
+    assert len(response.get('body')) == 1
 
 
 @pytest.mark.asyncio
