@@ -35,8 +35,11 @@ async def client_session():
 
 @pytest_asyncio.fixture
 async def es_write_data(es_client):
-    async def inner(data: List[dict], es_index: str):
-        documents = [{"_index": es_index, "_id": row['id'], "_source": row} for row in data]
+    async def inner(data: List[dict], es_index: str, delete=False):
+        if not delete:
+            documents = [{"_index": es_index, "_id": row['id'], "_source": row} for row in data]
+        else:
+            documents = [{'_op_type': 'delete', '_index': es_index, '_id': row['id']} for row in data]
         try:
             await async_bulk(es_client, documents, refresh=True)
         except BulkIndexError:

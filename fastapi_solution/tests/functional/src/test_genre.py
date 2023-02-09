@@ -30,6 +30,7 @@ async def test_get_genre(make_get_request, es_write_data):
     assert response.get('status') == 200
     assert response.get('body')['id'] == genre_id
     assert response.get('body')['name'] == data[0].get('name')
+    await es_write_data(data, index, delete=True)
 
 
 @pytest.mark.asyncio
