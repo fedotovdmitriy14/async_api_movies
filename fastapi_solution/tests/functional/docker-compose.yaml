@@ -47,4 +47,7 @@ services:
     depends_on:
       fastapi_service:
         condition: service_started
-    entrypoint: sh -c "pytest"
+    entrypoint:
+      sh -c "python3 /fastapi_solution/tests/functional/utils/wait_for_es.py
+      && python3 /fastapi_solution/tests/functional/utils/wait_for_redis.py
+      && pytest"
