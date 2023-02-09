@@ -3,7 +3,7 @@ services:
     build:
       context: ../../
     env_file:
-      - .env
+      - .env.docker
     depends_on:
       redis:
         condition: service_healthy
@@ -43,7 +43,7 @@ services:
   tests:
     build: .
     env_file:
-      - .env
+      - .env.docker
     depends_on:
       fastapi_service:
         condition: service_started
