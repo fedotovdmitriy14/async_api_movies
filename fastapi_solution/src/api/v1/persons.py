@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 from fastapi import APIRouter, Depends, Query
 
 from src.models.film import FilmShort
@@ -7,6 +7,23 @@ from src.services.film import FilmService, get_film_service
 from src.services.person import PersonService, get_person_service
 
 router = APIRouter()
+
+
+
+
+
+@router.get(
+    "/",
+    response_model=List[Person],
+    summary="Get all persons",
+    description="Persons main"
+)
+async def get_all_persons(
+        page_number: Optional[int] = Query(alias='page[number]', default=1, gt=0),
+        page_size: Optional[int] = Query(alias='page[size]', default=10, gt=0, lt=10000),
+        person_service: PersonService = Depends(get_person_service)
+) -> List[Person]:
+    return await person_service.get_persons(page_number=page_number, page_size=page_size)
 
 
 @router.get(

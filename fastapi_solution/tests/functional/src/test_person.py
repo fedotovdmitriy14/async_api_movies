@@ -46,11 +46,11 @@ film_data = [
 ]
 
 
-# @pytest.mark.asyncio
-# async def test_get_all_persons(client_session):
-#     response = await make_get_request(client_session, method=index)
-#     assert response.get('status') == 200
-#     assert len(response.get('body')) > 1
+@pytest.mark.asyncio
+async def test_get_all_persons(client_session):
+    response = await make_get_request(client_session, method=index)
+    assert response.get('status') == 200
+    assert len(response.get('body')) > 1
 
 
 @pytest.mark.asyncio
@@ -103,6 +103,19 @@ async def test_get_all_persons_search_with_pagination(client_session):
     response = await make_get_request(client_session, method=search_film_url_path, params=params)
     assert response.get('status') == 200
     assert len(response.get('body')) == 1
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("page_number,page_size", (
+        (-1, 1),
+        (1, -1),
+        (0, 0),
+        (-1, -1)
+))
+async def test_persons_invalid_pagination(client_session, page_number, page_size):
+    params = {'page[size]': page_size, 'page[number]': page_number}
+    response = await make_get_request(client_session, method=search_film_url_path, params=params)
+    assert response.get('status') == 422
 
 
 @pytest.mark.asyncio
