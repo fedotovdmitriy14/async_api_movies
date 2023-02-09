@@ -105,3 +105,17 @@ async def test_search_film_by_title(es_client, client_session):
     response = await make_get_request(client_session, method=f'{search_film_url_path}', params=params)
     assert response.get('status') == 200
     assert response.get('body')[0]['id'] == film_id
+
+
+@pytest.mark.asyncio
+async def test_get_all_films_search_with_invalid_page_size(client_session):
+    params = {'page[size]': -1, 'page[number]': 1}
+    response = await make_get_request(client_session, method=search_film_url_path, params=params)
+    assert response.get('status') == 422
+
+
+@pytest.mark.asyncio
+async def test_get_all_films_search_with_invalid_page_number(client_session):
+    params = {'page[size]': 1, 'page[number]': -1}
+    response = await make_get_request(client_session, method=search_film_url_path, params=params)
+    assert response.get('status') == 422
