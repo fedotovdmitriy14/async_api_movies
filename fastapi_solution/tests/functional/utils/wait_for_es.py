@@ -16,5 +16,3 @@ def wait_for_es():
                     es_client.indices.create(index=index_name, ignore=400, body=index_dict)
             break
         time.sleep(1)
-
-wait_for_es()
