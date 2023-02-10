@@ -1,6 +1,7 @@
 import asyncio
 
 import aiohttp
+import aioredis
 import pytest
 from elasticsearch import AsyncElasticsearch
 from typing import List
@@ -31,6 +32,14 @@ async def client_session():
     session = aiohttp.ClientSession()
     yield session
     await session.close()
+
+
+@pytest_asyncio.fixture(scope='session')
+async def redis_client():
+    redis_client = await aioredis.create_redis_pool((test_settings.redis_host, test_settings.redis_port),
+                                                    minsize=10, maxsize=20)
+    yield redis_client
+    await redis_client.close()
 
 
 @pytest_asyncio.fixture

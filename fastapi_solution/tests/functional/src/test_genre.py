@@ -23,7 +23,7 @@ async def test_get_genre_not_valid(make_get_request, uuid):
 
 
 @pytest.mark.asyncio
-async def test_get_genre(make_get_request, es_write_data):
+async def test_get_genre(make_get_request, es_write_data, redis_client):
     await es_write_data(data, index)
     genre_id = data[0].get('id')
     response = await make_get_request(method=f'{index}/{genre_id}')
@@ -31,10 +31,14 @@ async def test_get_genre(make_get_request, es_write_data):
     assert response.get('body')['id'] == genre_id
     assert response.get('body')['name'] == data[0].get('name')
     await es_write_data(data, index, delete=True)
+    response = await make_get_request(method=f'{index}/{genre_id}')
+    assert response.get('status') == 200
+    assert response.get('body')['id'] == genre_id
+    assert response.get('body')['name'] == data[0].get('name')
 
 
 @pytest.mark.asyncio
-async def test_get_cache_genre(make_get_request, es_write_data, es_client):
+async def test_get_cache_genre(make_get_request, es_write_data, es_client, redis_cache_clear):
     await es_write_data(data, index)
     genre_id = data[0].get('id')
     response_1 = await make_get_request(method=f'{index}/{genre_id}')
