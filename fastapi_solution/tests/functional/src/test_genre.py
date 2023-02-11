@@ -1,5 +1,3 @@
-from http import HTTPStatus
-
 import pytest
 
 index = 'genres'

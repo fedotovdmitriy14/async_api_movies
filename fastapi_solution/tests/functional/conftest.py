@@ -1,7 +1,6 @@
 import asyncio
 
 import aiohttp
-import aioredis
 import pytest
 from elasticsearch import AsyncElasticsearch
 from typing import List
