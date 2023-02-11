@@ -15,4 +15,4 @@ async def wait_for_redis():
 
 
 if __name__ == '__main__':
-    await wait_for_redis()
+    wait_for_redis()
