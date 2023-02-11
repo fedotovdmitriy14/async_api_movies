@@ -45,6 +45,7 @@ async def redis_client():
 @pytest_asyncio.fixture
 async def es_write_data(es_client):
     async def inner(data: List[dict], es_index: str, delete=False):
+        await es_client.delete_by_query(index=es_index, body={"query": {"match_all": {}}})
         if not delete:
             documents = [{"_index": es_index, "_id": row['id'], "_source": row} for row in data]
         else:
