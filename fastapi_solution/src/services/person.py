@@ -9,10 +9,10 @@ from http import HTTPStatus
 from src.db.elastic import get_elastic
 from src.db.redis import get_redis
 from src.models.person import Person
-from src.services.base import BaseService
+from src.services.base_es_service import BaseElasticService
 
 
-class PersonService(BaseService):
+class PersonService(BaseElasticService):
     async def get_persons(
             self,
             page_number: int,

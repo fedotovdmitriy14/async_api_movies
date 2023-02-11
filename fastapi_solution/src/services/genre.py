@@ -5,10 +5,11 @@ from fastapi import Depends
 
 from src.db.elastic import get_elastic
 from src.db.redis import get_redis
-from src.services.base import BaseService
+
+from src.services.base_es_service import BaseElasticService
 
 
-class GenreService(BaseService):
+class GenreService(BaseElasticService):
     pass
 
 
