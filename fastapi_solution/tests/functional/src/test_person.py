@@ -48,6 +48,7 @@ film_data = [
 
 @pytest.mark.asyncio
 async def test_get_all_persons(client_session):
+    """Проверяем получение всех персон"""
     response = await make_get_request(client_session, method=index)
     assert response.get('status') == 200
     assert len(response.get('body')) > 1
@@ -58,12 +59,14 @@ async def test_get_all_persons(client_session):
     '0d40fb5d-d456-47c0-84c5-5929e74189ff', 'not_valid_uuid'
 ))
 async def test_get_persons_not_valid(client_session, uuid):
+    """Проверяем получение ошибки 404 при запросе по невалидному uuid"""
     response = await make_get_request(client_session, f'{index}/{uuid}')
     assert response.get('status') == 404
 
 
 @pytest.mark.asyncio
 async def test_get_person(es_client, client_session):
+    """Проверяем получение персоны по uuid"""
     await es_write_data(es_client, data, index)
     person_id = data[0].get('id')
     response = await make_get_request(client_session, method=f'{index}/{person_id}')
@@ -74,6 +77,7 @@ async def test_get_person(es_client, client_session):
 
 @pytest.mark.asyncio
 async def test_get_cache_person(client_session, es_client):
+    """Проверяем получение персоны из кеша"""
     await es_write_data(es_client, data, index)
     person_id = data[0].get('id')
     response_1 = await make_get_request(client_session, method=f'{index}/{person_id}')
@@ -86,6 +90,7 @@ async def test_get_cache_person(client_session, es_client):
 
 @pytest.mark.asyncio
 async def test_get_persons_film(es_client, client_session):
+    """Проверяем получение фильмов по персоне"""
     film_id = film_data[0]['id']
     data[0]["film_ids"] = [film_id, ]
     await es_write_data(es_client, film_data, 'movies')
@@ -99,6 +104,7 @@ async def test_get_persons_film(es_client, client_session):
 
 @pytest.mark.asyncio
 async def test_get_all_persons_search_with_pagination(client_session):
+    """Проверяем валидную пагинацию"""
     params = {'page[size]': 1, 'page[number]': 1}
     response = await make_get_request(client_session, method=search_film_url_path, params=params)
     assert response.get('status') == 200
@@ -116,13 +122,15 @@ async def test_get_all_persons_search_with_pagination(client_session):
     ),
 )
 async def test_persons_invalid_pagination(client_session, page_number, page_size):
+    """Проверяем невалидную пагинацию"""
     params = {'page[size]': page_size, 'page[number]': page_number}
     response = await make_get_request(client_session, method=search_film_url_path, params=params)
     assert response.get('status') == 422
 
 
 @pytest.mark.asyncio
-async def test_search_persons_by_title(es_client, client_session):
+async def test_search_persons_by_name(es_client, client_session):
+    """Проверяем получение персоны поиском по имени"""
     params = {'query': 'Test Person'}
     await es_write_data(es_client, data, es_index=index)
     person_id = data[0].get('id')

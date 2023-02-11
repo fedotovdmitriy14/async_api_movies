@@ -10,6 +10,7 @@ data = [{'id': '0031feab-8f53-412a-8f53-47098a60ac73', 'name': 'Test genre'},]
 
 @pytest.mark.asyncio
 async def test_get_all_genres(client_session):
+    """Проверяем получение всех жанров"""
     response = await make_get_request(client_session, method=index)
     assert response.get('status') == 200
     assert len(response.get('body')) > 1
@@ -20,12 +21,14 @@ async def test_get_all_genres(client_session):
     '00af52ec-9345-4d66-adbe-50eb917f463a', 'not_valid_uuid'
 ))
 async def test_get_genre_not_valid(client_session, uuid):
+    """Проверяем получение ошибки 404 при запросе по невалидному uuid"""
     response = await make_get_request(client_session, f'{index}/{uuid}')
     assert response.get('status') == 404
 
 
 @pytest.mark.asyncio
 async def test_get_genre(es_client, client_session):
+    """Проверяем получение жанра по uuid"""
     await es_write_data(es_client, data, index)
     genre_id = data[0].get('id')
     response = await make_get_request(client_session, method=f'{index}/{genre_id}')
@@ -36,6 +39,7 @@ async def test_get_genre(es_client, client_session):
 
 @pytest.mark.asyncio
 async def test_get_cache_genre(client_session, es_client):
+    """Проверяем получение жанра из кеша"""
     await es_write_data(es_client, data, index)
     genre_id = data[0].get('id')
     response_1 = await make_get_request(client_session, method=f'{index}/{genre_id}')
