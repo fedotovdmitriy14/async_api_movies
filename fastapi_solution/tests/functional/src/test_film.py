@@ -4,9 +4,9 @@ import pytest
 
 from tests.functional.utils.helpers import make_get_request, es_write_data
 
-
 search_film_url_path = 'films/search/'
 film_url_path = 'films'
+index_name = 'movies'
 data = [
     {
         "id": "65f01393-dd19-4b83-9703-d7764d33e489",
@@ -46,10 +46,11 @@ data = [
 
 
 @pytest.mark.asyncio
-async def test_get_all_films(client_session):
+async def test_get_all_films(es_client, client_session):
+    await es_write_data(es_client, data, es_index=index_name)
     response = await make_get_request(client_session, method=film_url_path)
     assert response.get('status') == 200
-    assert len(response.get('body')) > 1
+    assert len(response.get('body')) == 1
 
 
 @pytest.mark.asyncio
@@ -83,15 +84,17 @@ async def test_get_cache_film(client_session, es_client):
 
 
 @pytest.mark.asyncio
-async def test_get_all_films_search(client_session):
+async def test_get_all_films_search(es_client, client_session):
+    await es_write_data(es_client, data, es_index=index_name)
     response = await make_get_request(client_session, method=search_film_url_path)
     assert response.get('status') == 200
-    assert len(response.get('body')) > 1
+    assert len(response.get('body')) == 1
 
 
 @pytest.mark.asyncio
-async def test_get_all_films_search_with_pagination(client_session):
+async def test_get_all_films_search_with_pagination(es_client, client_session):
     params = {'page[size]': 1, 'page[number]': 1}
+    await es_write_data(es_client, data, es_index=index_name)
     response = await make_get_request(client_session, method=search_film_url_path, params=params)
     assert response.get('status') == 200
     assert len(response.get('body')) == 1
@@ -100,7 +103,7 @@ async def test_get_all_films_search_with_pagination(client_session):
 @pytest.mark.asyncio
 async def test_search_film_by_title(es_client, client_session):
     params = {'query': 'test title'}
-    await es_write_data(es_client, data, es_index='movies')
+    await es_write_data(es_client, data, es_index=index_name)
     film_id = data[0].get('id')
     response = await make_get_request(client_session, method=f'{search_film_url_path}', params=params)
     assert response.get('status') == 200
