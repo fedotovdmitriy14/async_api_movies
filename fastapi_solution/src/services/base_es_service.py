@@ -6,10 +6,11 @@ from elasticsearch import AsyncElasticsearch, NotFoundError
 from fastapi import HTTPException
 from pydantic import BaseModel
 
+from src.services.base_service import BaseService
 from src.services.redis_storage import RedisStorage, Models
 
 
-class BaseService:
+class BaseElasticService(BaseService):
     def __init__(self, redis: Redis, elastic: AsyncElasticsearch):
         self.redis = redis
         self.elastic = elastic
