@@ -85,19 +85,6 @@ async def test_get_cache_person(es_write_data, es_client, make_get_request):
     assert response_1['body'] == response_2['body']
 
 
-# @pytest.mark.asyncio
-# async def test_get_persons_film(es_write_data, make_get_request):
-#     film_id = film_data[0]['id']
-#     data[0]["film_ids"] = [film_id, ]
-#     await es_write_data(film_data, 'movies')
-#     await es_write_data(data, index)
-#     person_id = data[0].get('id')
-#     response = await make_get_request(method=f'{index}/{person_id}/film')
-#     assert response.get('status') == 200
-#     assert response.get('body')[0]['id'] == film_id
-#     assert response.get('body')[0]['title'] == film_data[0].get('title')
-
-
 @pytest.mark.asyncio
 async def test_get_all_persons_search_with_pagination(es_write_data, make_get_request):
     await es_write_data(data, index)
