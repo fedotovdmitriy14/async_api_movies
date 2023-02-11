@@ -2,11 +2,10 @@ from http import HTTPStatus
 
 import pytest
 
-from tests.functional.utils.helpers import make_get_request, es_write_data
-
 
 search_film_url_path = 'films/search/'
 film_url_path = 'films'
+index_name = 'movies'
 data = [
     {
         "id": "65f01393-dd19-4b83-9703-d7764d33e489",
@@ -46,85 +45,80 @@ data = [
 
 
 @pytest.mark.asyncio
-async def test_get_all_films(client_session):
-    """Проверяем получение всех фильмов"""
-    response = await make_get_request(client_session, method=film_url_path)
+async def test_get_all_films(es_write_data, make_get_request):
+    await es_write_data(data, index_name)
+    response = await make_get_request(method=film_url_path)
     assert response.get('status') == 200
-    assert len(response.get('body')) > 1
+    assert len(response.get('body')) == 1
 
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('uuid', (
     '00af52ec-9345-4d66-adbe-50eb917f463a6', 'not_valid_uuid'
 ))
-async def test_get_film_not_valid(client_session, uuid):
-    """Проверяем получение ошибки 404 при запросе по невалидному uuid"""
-    response = await make_get_request(client_session, f'{film_url_path}/{uuid}')
+async def test_get_film_not_valid(es_write_data, make_get_request, uuid):
+    await es_write_data(data, index_name)
+    response = await make_get_request(method=f'{film_url_path}/{uuid}')
     assert response.get('status') == 404
 
 
 @pytest.mark.asyncio
-async def test_get_film(es_client, client_session):
-    """Проверяем получение фильма по uuid"""
-    await es_write_data(es_client, data, es_index='movies')
+async def test_get_film(es_write_data, make_get_request):
+    await es_write_data(data, index_name)
     film_id = data[0].get('id')
-    response = await make_get_request(client_session, method=f'{film_url_path}/{film_id}')
+    response = await make_get_request(method=f'{film_url_path}/{film_id}')
     assert response.get('status') == 200
     assert response.get('body')['id'] == film_id
 
 
 @pytest.mark.asyncio
-async def test_get_cache_film(client_session, es_client):
-    """Проверяем получение фильма из кеша"""
-    await es_write_data(es_client, data, film_url_path)
+async def test_get_cache_film(es_write_data, make_get_request, es_client):
+    await es_write_data(data, index_name)
     film_id = data[0].get('id')
-    response_1 = await make_get_request(client_session, method=f'{film_url_path}/{film_id}')
+    response_1 = await make_get_request(method=f'{film_url_path}/{film_id}')
     assert response_1.get('status') == HTTPStatus.OK
     await es_client.delete('movies', film_id)
-    response_2 = await make_get_request(client_session, method=f'{film_url_path}/{film_id}')
+    response_2 = await make_get_request(method=f'{film_url_path}/{film_id}')
     assert response_2['status'] == HTTPStatus.OK
     assert response_1['body'] == response_2['body']
 
 
 @pytest.mark.asyncio
-async def test_get_all_films_search(client_session):
-    """Проверяем получение фильмов поиском"""
-    response = await make_get_request(client_session, method=search_film_url_path)
-    assert response.get('status') == 200
-    assert len(response.get('body')) > 1
-
-
-@pytest.mark.asyncio
-async def test_get_all_films_search_with_pagination(client_session):
-    """Проверяем валидную пагинацию"""
-    params = {'page[size]': 1, 'page[number]': 1}
-    response = await make_get_request(client_session, method=search_film_url_path, params=params)
+async def test_get_all_films_search(es_write_data, make_get_request):
+    await es_write_data(data, index_name)
+    response = await make_get_request(method=search_film_url_path)
     assert response.get('status') == 200
     assert len(response.get('body')) == 1
 
 
 @pytest.mark.asyncio
-async def test_search_film_by_title(es_client, client_session):
-    """Проверяем получение фильмов поиском"""
+async def test_get_all_films_search_with_pagination(es_write_data, make_get_request):
+    params = {'page[size]': 1, 'page[number]': 1}
+    await es_write_data(data, index_name)
+    response = await make_get_request(method=search_film_url_path, params=params)
+    assert response.get('status') == 200
+    assert len(response.get('body')) == 1
+
+
+@pytest.mark.asyncio
+async def test_search_film_by_title(es_write_data, make_get_request):
     params = {'query': 'test title'}
-    await es_write_data(es_client, data, es_index='movies')
+    await es_write_data(data, index_name)
     film_id = data[0].get('id')
-    response = await make_get_request(client_session, method=f'{search_film_url_path}', params=params)
+    response = await make_get_request(method=search_film_url_path, params=params)
     assert response.get('status') == 200
     assert response.get('body')[0]['id'] == film_id
 
 
 @pytest.mark.asyncio
-async def test_get_all_films_search_with_invalid_page_size(client_session):
-    """Проверяем невалидную пагинацию"""
+async def test_get_all_films_search_with_invalid_page_size(make_get_request):
     params = {'page[size]': -1, 'page[number]': 1}
-    response = await make_get_request(client_session, method=search_film_url_path, params=params)
+    response = await make_get_request(method=search_film_url_path, params=params)
     assert response.get('status') == 422
 
 
 @pytest.mark.asyncio
-async def test_get_all_films_search_with_invalid_page_number(client_session):
-    """Проверяем невалидную пагинацию"""
+async def test_get_all_films_search_with_invalid_page_number(make_get_request):
     params = {'page[size]': 1, 'page[number]': -1}
-    response = await make_get_request(client_session, method=search_film_url_path, params=params)
+    response = await make_get_request(method=search_film_url_path, params=params)
     assert response.get('status') == 422

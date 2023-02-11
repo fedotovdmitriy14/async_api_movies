@@ -12,3 +12,7 @@ async def wait_for_redis():
         if redis_client.ping():
             break
         time.sleep(1)
+
+
+if __name__ == '__main__':
+    wait_for_redis()
