@@ -9,9 +9,6 @@ from src.services.person import PersonService, get_person_service
 router = APIRouter()
 
 
-
-
-
 @router.get(
     "/",
     response_model=List[Person],

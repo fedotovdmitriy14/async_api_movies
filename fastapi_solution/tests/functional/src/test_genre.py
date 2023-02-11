@@ -3,7 +3,7 @@ from http import HTTPStatus
 import pytest
 
 index = 'genres'
-data = [{'id': '0031feab-8f53-412a-8f53-47098a60ac73', 'name': 'Test genre'},]
+data = [{'id': '0031feab-8f53-412a-8f53-47098a60ac73', 'name': 'Test genre'}]
 
 
 @pytest.mark.asyncio
