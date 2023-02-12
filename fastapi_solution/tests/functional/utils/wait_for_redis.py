@@ -1,5 +1,3 @@
-import time
-
 import aioredis
 
 from tests.functional.settings import test_settings
