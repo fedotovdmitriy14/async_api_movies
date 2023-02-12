@@ -1,4 +1,4 @@
-import aioredis
+from redis import asyncio as aioredis
 
 from tests.functional.settings import test_settings
 from tests.functional.utils.backoff import backoff
