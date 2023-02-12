@@ -49,7 +49,7 @@ film_data = [
 async def test_get_all_persons(es_write_data, make_get_request):
     await es_write_data(data, index)
     response = await make_get_request(method=index)
-    assert response.get('status') == 200
+    assert response.get('status') == HTTPStatus.OK
     assert len(response.get('body')) == 1
 
 
@@ -60,7 +60,7 @@ async def test_get_all_persons(es_write_data, make_get_request):
 async def test_get_persons_not_valid(es_write_data, make_get_request, uuid):
     await es_write_data(data, index)
     response = await make_get_request(method=f'{index}/{uuid}')
-    assert response.get('status') == 404
+    assert response.get('status') == HTTPStatus.NOT_FOUND
 
 
 @pytest.mark.asyncio
@@ -68,7 +68,7 @@ async def test_get_person(es_write_data, make_get_request):
     await es_write_data(data, index)
     person_id = data[0].get('id')
     response = await make_get_request(method=f'{index}/{person_id}')
-    assert response.get('status') == 200
+    assert response.get('status') == HTTPStatus.OK
     assert response.get('body')['id'] == person_id
     assert response.get('body')['name'] == data[0].get('name')
 
@@ -90,7 +90,7 @@ async def test_get_all_persons_search_with_pagination(es_write_data, make_get_re
     await es_write_data(data, index)
     params = {'page[size]': 1, 'page[number]': 1}
     response = await make_get_request(method=search_film_url_path, params=params)
-    assert response.get('status') == 200
+    assert response.get('status') == HTTPStatus.OK
     assert len(response.get('body')) == 1
 
 
@@ -108,7 +108,7 @@ async def test_persons_invalid_pagination(es_write_data, make_get_request, page_
     await es_write_data(data, index)
     params = {'page[size]': page_size, 'page[number]': page_number}
     response = await make_get_request(method=search_film_url_path, params=params)
-    assert response.get('status') == 422
+    assert response.get('status') == HTTPStatus.UNPROCESSABLE_ENTITY
 
 
 @pytest.mark.asyncio
@@ -117,5 +117,5 @@ async def test_search_persons_by_title(es_write_data, make_get_request):
     await es_write_data(data, index)
     person_id = data[0].get('id')
     response = await make_get_request(method=search_film_url_path, params=params)
-    assert response.get('status') == 200
+    assert response.get('status') == HTTPStatus.OK
     assert response.get('body')[0]['id'] == person_id

@@ -48,7 +48,7 @@ data = [
 async def test_get_all_films(es_write_data, make_get_request):
     await es_write_data(data, index_name)
     response = await make_get_request(method=film_url_path)
-    assert response.get('status') == 200
+    assert response.get('status') == HTTPStatus.OK
     assert len(response.get('body')) == 1
 
 
@@ -59,7 +59,7 @@ async def test_get_all_films(es_write_data, make_get_request):
 async def test_get_film_not_valid(es_write_data, make_get_request, uuid):
     await es_write_data(data, index_name)
     response = await make_get_request(method=f'{film_url_path}/{uuid}')
-    assert response.get('status') == 404
+    assert response.get('status') == HTTPStatus.NOT_FOUND
 
 
 @pytest.mark.asyncio
@@ -67,7 +67,7 @@ async def test_get_film(es_write_data, make_get_request):
     await es_write_data(data, index_name)
     film_id = data[0].get('id')
     response = await make_get_request(method=f'{film_url_path}/{film_id}')
-    assert response.get('status') == 200
+    assert response.get('status') == HTTPStatus.OK
     assert response.get('body')['id'] == film_id
 
 
@@ -87,7 +87,7 @@ async def test_get_cache_film(es_write_data, make_get_request, es_client):
 async def test_get_all_films_search(es_write_data, make_get_request):
     await es_write_data(data, index_name)
     response = await make_get_request(method=search_film_url_path)
-    assert response.get('status') == 200
+    assert response.get('status') == HTTPStatus.OK
     assert len(response.get('body')) == 1
 
 
@@ -96,7 +96,7 @@ async def test_get_all_films_search_with_pagination(es_write_data, make_get_requ
     params = {'page[size]': 1, 'page[number]': 1}
     await es_write_data(data, index_name)
     response = await make_get_request(method=search_film_url_path, params=params)
-    assert response.get('status') == 200
+    assert response.get('status') == HTTPStatus.OK
     assert len(response.get('body')) == 1
 
 
@@ -106,7 +106,7 @@ async def test_search_film_by_title(es_write_data, make_get_request):
     await es_write_data(data, index_name)
     film_id = data[0].get('id')
     response = await make_get_request(method=search_film_url_path, params=params)
-    assert response.get('status') == 200
+    assert response.get('status') == HTTPStatus.OK
     assert response.get('body')[0]['id'] == film_id
 
 
@@ -114,11 +114,11 @@ async def test_search_film_by_title(es_write_data, make_get_request):
 async def test_get_all_films_search_with_invalid_page_size(make_get_request):
     params = {'page[size]': -1, 'page[number]': 1}
     response = await make_get_request(method=search_film_url_path, params=params)
-    assert response.get('status') == 422
+    assert response.get('status') == HTTPStatus.UNPROCESSABLE_ENTITY
 
 
 @pytest.mark.asyncio
 async def test_get_all_films_search_with_invalid_page_number(make_get_request):
     params = {'page[size]': 1, 'page[number]': -1}
     response = await make_get_request(method=search_film_url_path, params=params)
-    assert response.get('status') == 422
+    assert response.get('status') == HTTPStatus.UNPROCESSABLE_ENTITY
