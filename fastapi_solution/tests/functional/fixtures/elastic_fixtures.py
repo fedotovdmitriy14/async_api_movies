@@ -1,11 +1,8 @@
-from http import HTTPStatus
 from typing import List
 
 import pytest_asyncio
 from elasticsearch._async.helpers import async_bulk
 from elasticsearch.helpers import BulkIndexError
-from fastapi import HTTPException
-from requests import RequestException
 
 from tests.functional.settings import test_settings
 

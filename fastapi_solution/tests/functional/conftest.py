@@ -8,9 +8,7 @@ from tests.functional.settings import test_settings
 import pytest_asyncio
 
 
-pytest_plugins = [
-   'tests.functional.fixtures.elastic_fixtures',
-]
+pytest_plugins = ['tests.functional.fixtures.elastic_fixtures', ]
 
 
 @pytest_asyncio.fixture(scope='session')

@@ -23,4 +23,3 @@ class AsyncSearchEngine(ABC):
     @abstractmethod
     async def get_by_id(self, *args, **kwargs):
         pass
-
