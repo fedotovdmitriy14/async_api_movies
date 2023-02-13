@@ -31,12 +31,10 @@ async def make_get_request(client_session):
         if not params:
             params = {}
         url = f'http://{test_settings.elastic_host}:{test_settings.fastapi_port}/api/v1/{method}'
-        try:
-            async with client_session.get(url, params=params) as response:
-                body = await response.json()
-                headers = response.headers
-                status = response.status
-            return dict(body=body, headers=headers, status=status)
-        except RequestException:
-            raise HTTPException(status_code=HTTPStatus.BAD_REQUEST)
+        async with client_session.get(url, params=params) as response:
+            body = await response.json()
+            headers = response.headers
+            status = response.status
+        return dict(body=body, headers=headers, status=status)
+
     return inner

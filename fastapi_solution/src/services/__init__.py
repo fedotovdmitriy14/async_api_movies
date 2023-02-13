@@ -12,3 +12,15 @@ class AbstractStorage(ABC):
     @abstractmethod
     async def put_data_to_cache(self, index_name: str, model: dict) -> None:
         pass
+
+
+class AsyncSearchEngine(ABC):
+
+    @abstractmethod
+    async def get_all(self, *args, **kwargs):
+        pass
+
+    @abstractmethod
+    async def get_by_id(self, *args, **kwargs):
+        pass
+
