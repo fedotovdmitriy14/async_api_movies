@@ -1,12 +1,15 @@
+from functools import lru_cache
 from http import HTTPStatus
 from typing import Optional, Type, Union
 
 from aioredis import Redis
 from elasticsearch import AsyncElasticsearch, NotFoundError
-from fastapi import HTTPException
+from fastapi import HTTPException, Depends
 from pydantic import BaseModel
 
-from src.services.elastic_storage import ElasticStorage
+from src.db.elastic import get_elastic
+from src.db.redis import get_redis
+from src.services.elastic_engine import ElasticSearchEngine
 from src.services.redis_storage import RedisStorage, Models
 
 
@@ -15,7 +18,7 @@ class BaseService:
         self.redis = redis
         self.elastic = elastic
         self.redis_storage = RedisStorage(redis=self.redis)
-        self.elastic_storage = ElasticStorage(elastic=self.elastic)
+        self.db_engine = ElasticSearchEngine(elastic=self.elastic)
 
     async def get_all(
             self,
@@ -23,59 +26,15 @@ class BaseService:
             index_name: str,
             sort: Optional[str] = None,
             filter_genre: Optional[str] = None,
-    ) -> list:
-        """получаем все данные из эластика, параметры сортировки и пагинация учтены"""
-        body = {'query': {'match_all': {}}}
-        if filter_genre:
-            body = {
-                'query': {
-                    'bool': {
-                        'must': [
-                            {
-                                'nested': {
-                                    'path': 'genre',
-                                    'query': {
-                                        'bool': {
-                                            'should': [
-                                                {
-                                                    'term':
-                                                        {
-                                                            'genre.id': filter_genre,
-                                                        }
-                                                }
-                                            ]
-                                        }
-                                    },
-                                }
-                            }
-                        ]
-                    }
-                }
-            }
-        if sort:
-            order = 'asc'
-            if sort[0] == '-':
-                order = 'desc'
-                sort = sort[1:]
-            if sort in model.__annotations__:
-                body.update({'sort': [{sort: {'order': order}}]})
-        document = await self.elastic_storage.get_all(index_name=index_name, body=body)
-        result = [model(**hit["_source"]) for hit in document["hits"]["hits"]]
-        if not result:
-            raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=f'{index_name} not found')
-        return result
-
-    async def get_by_id(
-            self,
-            id_: str,
-            model: Union[Models],
-            index_name: str,
     ):
-        """проверяется, есть ли запись в кеше; если нет - достается из эластика"""
+        return await self.db_engine.get_all(index_name=index_name, model=model, sort=sort, filter_genre=filter_genre)
+
+    async def get_by_id(self, index_name: str, id_: str, model: Union[Models]):
         res = await self.redis_storage.data_from_cache(index_name, model, id_)
+        print(f'{res=}')
         if not res:
             try:
-                res = await self.elastic_storage.get_by_id(index_name=index_name, id_=id_)
+                res = await self.db_engine.get_by_id(index_name=index_name, id_=id_)
             except NotFoundError:
                 raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=f'no {index_name} with this id')
             res = res['_source']
@@ -84,3 +43,30 @@ class BaseService:
             return model(**res)
 
         return res
+
+    async def get_sorted_films(
+            self,
+            page_number: int,
+            page_size: int,
+            query: Optional[str] = None,
+    ):
+        return await self.db_engine.get_sorted_films(page_number=page_number, page_size=page_size, query=query)
+
+    async def get_person_films(self, ids: list[str]):
+        return await self.db_engine.get_person_films(ids=ids)
+
+    async def get_persons(
+            self,
+            page_number: int,
+            page_size: int,
+            query: Optional[str] = None,
+    ):
+        return await self.db_engine.get_persons(page_number=page_number, page_size=page_size, query=query)
+
+
+@lru_cache()
+def get_service(
+        redis: Redis = Depends(get_redis),
+        elastic: AsyncElasticsearch = Depends(get_elastic),
+) -> BaseService:
+    return BaseService(redis, elastic)
