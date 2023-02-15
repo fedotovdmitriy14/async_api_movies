@@ -9,10 +9,10 @@ from fastapi import Depends, HTTPException
 from src.db.elastic import get_elastic
 from src.db.redis import get_redis
 from src.models.film import FilmShort
-from src.services.base_es_service import BaseElasticService
+from src.services.base_service import BaseService
 
 
-class FilmService(BaseElasticService):
+class FilmService(BaseService):
     async def get_sorted_films(
             self,
             page_number: int,
