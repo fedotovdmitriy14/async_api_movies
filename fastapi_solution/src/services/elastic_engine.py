@@ -132,4 +132,3 @@ class ElasticSearchEngine(AsyncSearchEngine):
         if not result:
             raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='persons not found')
         return result
-
