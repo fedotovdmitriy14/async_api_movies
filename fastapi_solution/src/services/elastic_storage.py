@@ -8,7 +8,7 @@ class ElasticStorage(AsyncSearchEngine):
         self.elastic = elastic
 
     async def get_by_id(self, index_name: str, id_: str):
-        """Берем данные по """
+        """Берем данные по id"""
         return await self.elastic.get(index=index_name, id=id_)
 
     async def get_all(self, index_name: str, body: dict):
