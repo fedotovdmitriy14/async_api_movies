@@ -1,14 +1,11 @@
-from functools import lru_cache
 from http import HTTPStatus
 from typing import Optional, Type, Union
 
 from aioredis import Redis
 from elasticsearch import AsyncElasticsearch, NotFoundError
-from fastapi import HTTPException, Depends
+from fastapi import HTTPException
 from pydantic import BaseModel
 
-from src.db.elastic import get_elastic
-from src.db.redis import get_redis
 from src.services.elastic_engine import ElasticSearchEngine
 from src.services.redis_storage import RedisStorage, Models
 
@@ -43,30 +40,3 @@ class BaseService:
             return model(**res)
 
         return res
-
-    async def get_sorted_films(
-            self,
-            page_number: int,
-            page_size: int,
-            query: Optional[str] = None,
-    ):
-        return await self.db_engine.get_sorted_films(page_number=page_number, page_size=page_size, query=query)
-
-    async def get_person_films(self, ids: list[str]):
-        return await self.db_engine.get_person_films(ids=ids)
-
-    async def get_persons(
-            self,
-            page_number: int,
-            page_size: int,
-            query: Optional[str] = None,
-    ):
-        return await self.db_engine.get_persons(page_number=page_number, page_size=page_size, query=query)
-
-
-@lru_cache()
-def get_service(
-        redis: Redis = Depends(get_redis),
-        elastic: AsyncElasticsearch = Depends(get_elastic),
-) -> BaseService:
-    return BaseService(redis, elastic)
