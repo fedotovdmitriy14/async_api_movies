@@ -33,4 +33,5 @@ async def make_get_request(client_session):
             headers = response.headers
             status = response.status
         return dict(body=body, headers=headers, status=status)
+
     return inner
