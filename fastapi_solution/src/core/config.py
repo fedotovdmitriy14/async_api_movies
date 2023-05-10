@@ -17,6 +17,8 @@ class Settings(BaseSettings):
     elastic_port: str = Field(..., env="ELASTIC_PORT")
     base_dir: str = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     redis_cache_time: int = Field(..., env="REDIS_CACHE_TIME")
+    jwt_algorithm: str = Field(..., env="JWT_ALGORITHM")
+    jwt_secret_key: str = Field(..., env="JWT_SECRET_KEY")
 
     class Config:
         env_file = '.env.api'

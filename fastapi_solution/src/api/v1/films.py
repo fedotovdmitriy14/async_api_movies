@@ -2,6 +2,8 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, Query
 
+from src.auth.user_schema import User
+from src.auth.verification import Access, get_user
 from src.models.film import FilmShort, FilmDetail
 from src.services.film import FilmService, get_film_service
 
@@ -30,11 +32,13 @@ async def get_one_film(
     response_model=list[FilmShort],
     description='All films info',
     summary='Get all films',
+    dependencies=[Depends(Access({'admin', 'subscriber'}))],
 )
 async def get_all_films(
         sort: Optional[str] = Query(default=None),
         filter_genre: Optional[str] = Query(None, alias='filter[genre]'),
         film_service: FilmService = Depends(get_film_service),
+        user: User = Depends(get_user),
 ) -> list[FilmShort]:
     return await film_service.get_all(
         sort=sort,
