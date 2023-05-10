@@ -10,6 +10,7 @@ security = HTTPBearer()
 
 
 def decode_token(token: str) -> User:
+    """Токен декодируется."""
     try:
         payload = jwt.decode(token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm])
     except JWTError:
@@ -22,14 +23,17 @@ def decode_token(token: str) -> User:
 
 
 def get_user(request: Request) -> User:
+    """Внедряется в ручку как dependency, чтобы работать с каждой ролью отдельно."""
     return request.state.user
 
 
 class Access:
     def __init__(self, roles: set[str]):
+        """Список ролей, которым разрешен доступ."""
         self.roles = roles
 
     def __call__(self, request_user: tuple[Request, HTTPAuthorizationCredentials] = Depends(security)) -> None:
+        """Токен декодируется, в нем проверяются роли."""
         exc = HTTPException(
             status_code=HTTP_403_FORBIDDEN,
             detail='Not authenticated',

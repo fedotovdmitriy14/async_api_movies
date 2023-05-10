@@ -9,11 +9,13 @@ from src.auth.user_schema import HTTPAuthorizationCredentials
 
 
 class HTTPBearer(HTTPBase):
+    """Достает токен из заголовков."""
 
     def __init__(self):
         super().__init__(scheme='bearer')
 
     async def __call__(self, request: Request) -> tuple[Request, Optional[HTTPAuthorizationCredentials]]:
+        """Токен достается из заголовка и валидируется."""
         exc = HTTPException(
             status_code=HTTP_403_FORBIDDEN,
             detail='Not authenticated',
